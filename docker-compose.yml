@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: ./backend
+    # We will use the 'uvicorn' command directly in the Dockerfile for production-like setup later.
+    # For now, keep it simple if you use --reload, but be aware it's not prod-ready.
+    # command: python -m uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+    command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"] # Removed --reload for stability
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
+    environment:
+      PYTHONPATH: /app
+      REDIS_BROKER_URL: ${REDIS_BROKER_URL}
+      MODEL_SERVICE_URL: http://model:8001/score # Define for backend too, or just in celery_worker
+    depends_on:
+      - db
+      - redis
+      - model # Backend also directly interacts with model during sync phase. Useful for debugging if async fails.
+
+  model:
+    build: ./model
+    command: python serve.py
+    volumes:
+      - ./model:/app
+    ports:
+      - "8001:8001"
+    env_file:
+      - ./.env
+
+  worker:
+    build:
+      context: .
+      dockerfile: ./worker/Dockerfile
+    command: celery -A backend_code.celery_worker worker --loglevel=debug
+    volumes:
+      - ./backend:/app/backend_code # This volume mount is for runtime (Celery worker access)
+    env_file:
+      - ./.env
+    environment:
+      PYTHONPATH: /app/backend_code
+      REDIS_BROKER_URL: ${REDIS_BROKER_URL}
+      DATABASE_URL: ${DATABASE_URL}
+      MODEL_SERVICE_URL: http://model:8001/score
+    depends_on:
+      - db
+      - redis
+      - model
+
+  cron:
+    build: ./cron
+    restart: always
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+
+volumes:
+  db_data:

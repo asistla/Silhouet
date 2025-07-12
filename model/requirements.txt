@@ -1,0 +1,2 @@
+# model/requirements.txt
+flask

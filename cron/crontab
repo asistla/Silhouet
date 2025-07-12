@@ -1,0 +1,5 @@
+# silhouet/cron/crontab
+# m h dom mon dow command
+0 0 * * * /usr/local/bin/cleanup_job.sh >> /var/log/cron.log 2>&1
+# This schedules cleanup_job.sh to run daily at midnight UTC.
+# Output is logged to /var/log/cron.log within the container.

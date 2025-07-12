@@ -1,0 +1,11 @@
+# backend/requirements.txt
+fastapi
+uvicorn[standard]
+sqlalchemy
+sqlalchemy-bind-manager
+psycopg2-binary # PostgreSQL adapter
+pydantic
+python-dotenv
+httpx
+celery
+redis
