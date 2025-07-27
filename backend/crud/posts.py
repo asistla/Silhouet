@@ -4,7 +4,7 @@ import uuid
 # Removed httpx import - no longer needed for direct call
 # Removed MODEL_SERVICE_URL constant - task handles it
 
-from models import Post
+#from models import Post
 from schemas import PostCreate
 
 # Import the Celery task

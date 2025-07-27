@@ -8,7 +8,7 @@ import json
 import redis # <<< NEW IMPORT for synchronous Redis client
 from datetime import datetime
 from database import SessionLocal
-from models import Post
+#from models import Post
 
 from dotenv import load_dotenv
 load_dotenv()

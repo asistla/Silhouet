@@ -1,6 +1,7 @@
 # model/serve.py
 from flask import Flask, request, jsonify
 import json
+import uvicorn
 app = Flask(__name__)
 import os
 from fastapi import FastAPI, HTTPException
@@ -54,4 +55,4 @@ def score_text():
     return jsonify({"scores": scores})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8001, debug=True) # debug=True for local dev
+    uvicorn.run(host='0.0.0.0', port=8001, debug=True) # debug=True for local dev
