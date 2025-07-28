@@ -1,16 +1,10 @@
 # backend/models.py
-#from sqlalchemy import Column, String, DateTime, TEXT, Float # <<< ADD Float
-#from sqlalchemy.sql import func
-#from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB # <<< ADD JSONB (or just use TEXT)
-#import uuid
-#from database import Base
-
-# backend/models.py
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, Float, DateTime, UniqueConstraint, Index, text
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.ext.declarative import declarative_base
+
 from silhouet_config import PERSONALITY_KEYS # Import from shared config
 
 Base = declarative_base()
@@ -76,28 +70,3 @@ class AggregatedGeoScore(Base):
         UniqueConstraint('geo_level', 'geo_identifier', name='unique_geo_level_identifier'),
         Index('idx_agg_geo_level_identifier', 'geo_level', 'geo_identifier'),
     )
-
-
-#class User(Base):
-#    __tablename__ = "users"
-
-#    id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-#    public_key = Column(String, unique=True, index=True)
-#    created_at = Column(DateTime(timezone=True), server_default=func.now())
-#    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-
-#class Post(Base):
-#    __tablename__ = "posts"
-
-#    id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-#    user_id = Column(PG_UUID(as_uuid=True), index=True)
-#    raw_text = Column(TEXT, nullable=False)
-#    # <<< ADD THESE NEW COLUMNS
-#    category = Column(String, nullable=True) # Optional in Pydantic means nullable in DB
-#    sentiment_scores_json = Column(JSONB, nullable=True) # To store the dictionary of scores
-    # If JSONB doesn't work out of the box, you can use TEXT and store json.dumps()
-    # sentiment_scores_json = Column(TEXT, nullable=True) 
-    # >>>
-
-#    created_at = Column(DateTime(timezone=True), server_default=func.now())
-#    updated_at = Column(DateTime(timezone=True), onupdate=func.now())

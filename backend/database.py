@@ -1,28 +1,41 @@
 # backend/database.py
 import os
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from dotenv import load_dotenv
-# Get database URL from environment variable
-# Use os.getenv for environment variables
-load_dotenv(override = True)
-DATABASE_URL = os.getenv("DATABASE_URL")
-print(DATABASE_URL)
-# Create the SQLAlchemy engine
-# connect_args={"check_same_thread": False} is for SQLite, often not needed for PostgreSQL
-engine = create_engine(DATABASE_URL)
+from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.pool import StaticPool # For SQLite in-memory testing if needed, remove for production PostgreSQL
 
-# Create a SessionLocal class for database sessions
+# Import your models so SQLAlchemy knows about them
+from models import Base # Assuming Base is defined in models.py
+
+# Database URL from environment variables
+# Default to a PostgreSQL URL, ensure it matches your docker-compose.yml
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@db:5432/silhouet_db")
+
+# Create the SQLAlchemy engine
+# For production, remove connect_args and poolclass if not using SQLite in-memory
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True # Ensures connections are alive
+)
+
+# Create a SessionLocal class to get database sessions
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Base class for declarative models
-Base = declarative_base()
+def create_db_tables():
+    """Creates all database tables defined in SQLAlchemy models."""
+    print("Attempting to create database tables...")
+    try:
+        Base.metadata.create_all(engine)
+        print("Database tables created successfully or already exist.")
+    except Exception as e:
+        print(f"Error creating database tables: {e}")
+        # In a real application, you might want to log this error more robustly
+        # and potentially exit if critical tables cannot be created.
 
-# --- THIS IS THE CRUCIAL CHANGE ---
-# This function should *create and RETURN* a database session.
-# It should NOT use 'yield'.
-def get_db():
+def get_db_session():
+    """Dependency to get a database session for FastAPI endpoints."""
     db = SessionLocal()
-    return db # <<< Change 'yield db' to 'return db' here
-    # No try/finally block here. The 'get_db_session' in app.py handles closing.
+    try:
+        yield db
+    finally:
+        db.close()

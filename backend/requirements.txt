@@ -1,6 +1,6 @@
 # backend/requirements.txt
 fastapi
-#uvicorn[standard]
+uvicorn[standard]
 sqlalchemy
 sqlalchemy-bind-manager
 psycopg2-binary # PostgreSQL adapter

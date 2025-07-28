@@ -7,6 +7,9 @@ import os
 from dotenv import load_dotenv
 import time
 
+#----------- TEST
+from randomUser import createRandomUser
+#-----------
 # Load environment variables from .env file
 load_dotenv()
 
@@ -43,8 +46,8 @@ async def create_user(client: httpx.AsyncClient, public_key: str) -> uuid.UUID |
     print(f"\nAttempting to create user with public_key: {public_key}")
     try:
         response = await client.post(
-            f"{BACKEND_URL}/users/",
-            json={"public_key": public_key}
+            f"{BACKEND_URL}/register/",
+            json=createRandomUser()
         )
         response.raise_for_status()
         user_data = response.json()

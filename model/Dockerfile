@@ -8,7 +8,22 @@ COPY silhouet_config.py .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
-
+#
 EXPOSE 8001
+#
+#CMD ["python", "serve.py"]
 
-CMD ["python", "serve.py"]
+
+# NLTK data download (for VADER)
+RUN mkdir -p /app/nltk_data && \
+    python -c "import nltk; nltk.download('vader_lexicon', download_dir='/app/nltk_data')"
+ENV NLTK_DATA /app/nltk_data
+
+# Set environment variable for Hugging Face cache
+ENV HF_HOME ./hf_cache
+# Create a directory for the cache
+RUN mkdir -p ./hf_cache
+
+# Command to run the FastAPI application directly using uvicorn
+# This tells uvicorn to look for an 'app' object within the 'app' module (i.e., app.py)
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]

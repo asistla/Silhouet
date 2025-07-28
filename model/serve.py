@@ -12,9 +12,8 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from silhouet_config import PERSONALITY_LABEL_MAP
 # Import the shared configuration
 from silhouet_config import PERSONALITY_KEYS
-
-app = FastAPI()
-
+#app = FastAPI()
+#from app import app
 # --- Initialize NLP models/analyzers at startup ---
 classifier = None
 vader_analyzer = None
@@ -34,7 +33,6 @@ def score_text():
     print(f"Model service received text: '{text[:50]}...'") # Log received text for debugging
 
     # --- PoC: Mocked NLP Logic ---
-    # This simulates your NLP model returning 57 sentiment scores (0.0 to 1.0)
     # The actual scores are simple hashes/lengths for demonstration.
     scores = {}
     for i in range(1, 5):
@@ -54,5 +52,8 @@ def score_text():
     print(f"Model service returning scores for '{text[:20]}...'")
     return jsonify({"scores": scores})
 
+def main():
+    uvicorn.run(app, host='0.0.0.0', port=8001) # debug=True for local dev
+
 if __name__ == '__main__':
-    uvicorn.run(host='0.0.0.0', port=8001, debug=True) # debug=True for local dev
+    main()
