@@ -1,6 +1,7 @@
 # backend/app.py
 from fastapi import FastAPI, Depends, HTTPException, status, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
+from datetime import datetime, timezone
 import time
 import os
 from dotenv import load_dotenv
@@ -13,6 +14,19 @@ from crud import users, posts
 from schemas import UserCreate, UserResponse, PostCreate, PostResponse
 from pydantic import BaseModel
 import redis.asyncio as redis # <<< NEW IMPORT for async Redis client
+from silhouet_config import PERSONALITY_KEYS, AGGREGATION_FREQUENCIES, PERSONALITY_LABEL_MAP
+
+# --- Make sure this import is present ---
+from models import User, AggregatedGeoScore # The fix is here
+
+# --- Other imports ---
+from database import get_db_session, create_db_tables
+from schemas import (
+    UserCreate,
+    PostCreate
+#    ModelServicePersonalityScores,
+#    UserProfileResponse
+)
 
 # Load environment variables
 load_dotenv()
@@ -168,7 +182,7 @@ def get_db():
     finally:
         db.close()
 
-@app.post("/register", status_code=status.HTTP_201_CREATED)
+@app.post("/register/", status_code=status.HTTP_201_CREATED)
 async def register_user(
     request: UserCreate,
     db: Session = Depends(get_db)
@@ -214,7 +228,8 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db_user = users.get_user_by_public_key(db, public_key=user.public_key)
     if db_user:
         return db_user
-    return users.create_user(db=db, user=user)
+    return None
+#    return users.create_user(db=db, user=user)
 
 @app.get("/users/{user_id}", response_model=UserResponse)
 def read_user(user_id: uuid.UUID, db: Session = Depends(get_db)):

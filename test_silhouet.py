@@ -51,8 +51,9 @@ async def create_user(client: httpx.AsyncClient, public_key: str) -> uuid.UUID |
         )
         response.raise_for_status()
         user_data = response.json()
-        user_id = uuid.UUID(user_data["id"])
-        print(f"✅ User created: ID={user_id}, Public Key={user_data['public_key']}")
+        print(json.dumps(user_data, indent = 2, sort_keys = True))
+        user_id = uuid.UUID(user_data["user_id"])
+#        print(f"✅ User created: ID={user_id}, Public Key={user_data['public_key']}")
         return user_id
     except httpx.HTTPStatusError as e:
         # If we get a 400 'Public key already registered' despite generating a unique key,
@@ -74,7 +75,7 @@ async def create_post(client: httpx.AsyncClient, user_id: uuid.UUID, raw_text: s
         )
         response.raise_for_status()
         post_data = response.json()
-        post_id = uuid.UUID(post_data["id"])
+        post_id = uuid.UUID(post_data["user_id"])
         print(f"✅ Post created: ID={post_id}")
         return post_id
     except httpx.HTTPStatusError as e:
