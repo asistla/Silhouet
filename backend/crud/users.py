@@ -16,4 +16,4 @@ def create_user(db: Session, user: UserCreate):
     return db_user
 
 def get_user_by_id(db: Session, user_id: uuid.UUID):
-    return db.query(User).filter(User.id == user_id).first()
+    return db.query(User).filter(User.user_id == user_id).first()

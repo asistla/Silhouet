@@ -1,34 +1,26 @@
 # model/serve.py
-from flask import Flask, request, jsonify
-import json
-import uvicorn
-app = Flask(__name__)
-import os
-from fastapi import FastAPI, HTTPException
+#from flask import Flask, request, jsonify
+import json, uvicorn, os, nltk
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field
 from transformers import pipeline
-import nltk
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-from silhouet_config import PERSONALITY_LABEL_MAP
-# Import the shared configuration
-from silhouet_config import PERSONALITY_KEYS
-#app = FastAPI()
-#from app import app
+from silhouet_config import *
+
+app = FastAPI()
+
 # --- Initialize NLP models/analyzers at startup ---
 classifier = None
 vader_analyzer = None
 
-# Mapping of your personality keys to zero-shot labels.
-# Each value should be a tuple (positive_hypothesis, negative_hypothesis)
-# The score will be derived from the confidence of the positive hypothesis.
+class ScoreRequest(BaseModel):
+    text: str
 
-@app.route('/score', methods=['POST'])
-def score_text():
-    data = request.json
-    text = data.get('text')
-
+@app.post('/score')
+async def score_text(request: ScoreRequest):
+    text = request.text
     if not text:
-        return jsonify({"error": "No text provided"}), 400
+        raise HTTPException(status_code=400, detail="No text provided")
 
     print(f"Model service received text: '{text[:50]}...'") # Log received text for debugging
 
@@ -50,7 +42,7 @@ def score_text():
     # For PoC, it's fine if not all 57 are unique, just demonstrating the structure.
     # --- End Mocked NLP Logic ---
     print(f"Model service returning scores for '{text[:20]}...'")
-    return jsonify({"scores": scores})
+    return json.dumps({"scores": scores})
 
 def main():
     uvicorn.run(app, host='0.0.0.0', port=8001) # debug=True for local dev
