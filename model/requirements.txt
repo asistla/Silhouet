@@ -1,9 +1,7 @@
 # model/requirements.txt
 fastapi
-flask
 transformers
 nltk
-vaderSentiment
 torch
-tensorflow
+tf.keras
 uvicorn[standard]
