@@ -10,14 +10,10 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - db_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
 
   redis:
     image: redis:7-alpine
     restart: always
-    ports:
-      - "6379:6379"
 
   backend:
     build: ./backend
@@ -45,8 +41,6 @@ services:
     command: python serve.py
     volumes:
       - ./model:/app
-    ports:
-      - "8001:8001"
     env_file:
       - ./.env
 

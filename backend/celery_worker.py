@@ -5,17 +5,16 @@ import httpx
 from sqlalchemy.orm import Session
 import uuid
 import json
-import redis # <<< NEW IMPORT for synchronous Redis client
+import redis
 from datetime import datetime
 from database import SessionLocal
-#from models import Post
+from models import Post
 
 from dotenv import load_dotenv
 load_dotenv()
 
 REDIS_BROKER_URL = os.getenv("REDIS_BROKER_URL", "redis://redis:6379/0")
 MODEL_SERVICE_URL = os.getenv("MODEL_SERVICE_URL", "http://model:8001/score")
-# Removed BACKEND_INTERNAL_UPDATE_URL as it's no longer needed
 
 # Define the Redis Pub/Sub channel name (must match backend's listener)
 PUBSUB_CHANNEL = "sentiment_updates" # <<< NEW
@@ -62,9 +61,9 @@ def process_post_sentiment_task(post_id: str, raw_text: str):
             return
 
         # Make HTTP call to model service
-        response = httpx.post(MODEL_SERVICE_URL, json={"text": raw_text})
+        response = httpx.post(MODEL_SERVICE_URL, json=({"text": raw_text}))
         response.raise_for_status()
-        sentiment_data = response.json()
+        sentiment_data = json.loads(response.json())
         returned_scores = sentiment_data.get("scores")
 
         if returned_scores and isinstance(returned_scores, dict):

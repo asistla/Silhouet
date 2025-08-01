@@ -75,7 +75,8 @@ async def create_post(client: httpx.AsyncClient, user_id: uuid.UUID, raw_text: s
         )
         response.raise_for_status()
         post_data = response.json()
-        post_id = uuid.UUID(post_data["user_id"])
+        print(post_data)
+        post_id = post_data.get('id')
         print(f"✅ Post created: ID={post_id}")
         return post_id
     except httpx.HTTPStatusError as e:
@@ -139,14 +140,11 @@ async def main():
                         break
 
                     message_str = await asyncio.wait_for(ws.recv(), timeout=remaining_timeout)
-                    
                     print(f"Received message: {message_str}...")
                     message_data = json.loads(message_str)
-
                     if message_data.get("type") == "post_sentiment_update" and \
                        message_data.get("post_id") == str(post_id) and \
                        message_data.get("user_id") == str(temp_user_id): # Check against the user_id from creation
-                        
                         received_message = message_data
                         print(f"✅ Received expected sentiment update for post {post_id}:")
                         print(json.dumps(received_message, indent=2))
@@ -175,7 +173,5 @@ async def main():
 
     print("\n--- Silhouet E2E Test Finished ---")
 
-if __name__ == "__main__":
-    asyncio.run(main())
 if __name__ == "__main__":
     asyncio.run(main())
