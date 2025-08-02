@@ -1,15 +1,12 @@
 # model/serve.py
 #from flask import Flask, request, jsonify
-import json, uvicorn, os, nltk
+import json, uvicorn, os
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field
-from transformers import pipeline
+from sentence_transformers import SentenceTransformer, util
 from silhouet_config import *
 
 app = FastAPI()
-
-# --- Initialize NLP models/analyzers at startup ---
-classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
 
 class ScoreRequest(BaseModel):
     text: str
@@ -50,7 +47,7 @@ async def score_text(request: ScoreRequest):
         key: round((score + 1) / 2, 4) for key, score in scores.items()
     }
 
-    return {"scores": normalized_scores}
+    return json.dumps({"scores": normalized_scores})
 
 # --- Averaging function for backend ---
 def update_running_average(current_avg: float, count: int, new_score: float) -> float:

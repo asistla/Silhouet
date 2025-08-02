@@ -1,7 +1,4 @@
 # model/requirements.txt
 fastapi
-transformers
-nltk
-torch
-tf.keras
+sentence_transformers
 uvicorn[standard]

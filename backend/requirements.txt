@@ -9,4 +9,3 @@ python-dotenv
 httpx
 celery
 redis
-transformers

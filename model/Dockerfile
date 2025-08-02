@@ -14,11 +14,6 @@ EXPOSE 8001
 #CMD ["python", "serve.py"]
 
 
-# NLTK data download (for VADER)
-RUN mkdir -p /app/nltk_data && \
-    python -c "import nltk; nltk.download('vader_lexicon', download_dir='/app/nltk_data')"
-ENV NLTK_DATA /app/nltk_data
-
 # Set environment variable for Hugging Face cache
 ENV HF_HOME ./hf_cache
 # Create a directory for the cache
