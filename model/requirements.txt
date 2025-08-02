@@ -1,4 +1,5 @@
 # model/requirements.txt
 fastapi
-sentence_transformers
+sentence-transformers
 uvicorn[standard]
+torch
