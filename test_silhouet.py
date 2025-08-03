@@ -46,14 +46,14 @@ async def create_user(client: httpx.AsyncClient, public_key: str) -> uuid.UUID |
     print(f"\nAttempting to create user with public_key: {public_key}")
     try:
         response = await client.post(
-            f"{BACKEND_URL}/register/",
+            f"{BACKEND_URL}/users/",
             json=createRandomUser()
         )
         response.raise_for_status()
         user_data = response.json()
         print(json.dumps(user_data, indent = 2, sort_keys = True))
         user_id = uuid.UUID(user_data["user_id"])
-#        print(f"✅ User created: ID={user_id}, Public Key={user_data['public_key']}")
+        print(f"✅ User created: ID={user_id}, Public Key={user_data['public_key']}")
         return user_id
     except httpx.HTTPStatusError as e:
         # If we get a 400 'Public key already registered' despite generating a unique key,
@@ -120,7 +120,8 @@ async def main():
 
             # --- Now, within the active WebSocket connection, create the post ---
             async with httpx.AsyncClient() as http_client:
-                test_raw_text = f"This is an E2E test message for real-time sentiment analysis! Generated at {time.time()}."
+                with open('example.txt') as f:
+                    test_raw_text = f.read()
                 # Use the original user_id (temp_user_id) for the post creation
                 post_id = await create_post(http_client, temp_user_id, test_raw_text)
                 if not post_id:

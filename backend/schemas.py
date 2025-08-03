@@ -5,18 +5,18 @@ from datetime import datetime
 from typing import Optional
 
 class UserCreate(BaseModel):
-    age: int = Field(..., description="User's age.")
-    sex: str = Field(..., description="User's biological sex (e.g., 'Male', 'Female', 'Non-binary', 'Prefer not to say').")
-    gender: str = Field(..., description="User's gender identity (e.g., 'Man', 'Woman', 'Non-binary', 'Prefer not to say').")
-    religion: str = Field(..., description="User's religious affiliation (e.g., 'Christianity', 'Islam', 'None', 'Prefer not to say').")
-    ethnicity: str = Field(..., description="User's ethnicity (e.g., 'Asian', 'Caucasian', 'African', 'Prefer not to say').")
-    pincode: str = Field(..., description="User's residential pincode.")
-    city: str = Field(..., description="User's city.")
-    district: str = Field(..., description="User's district.")
-    state: str = Field(..., description="User's state.")
-    country: str = Field(..., description="User's country.")
-    nationality: str = Field(..., description="User's nationality.")
     public_key: str # The user's public key string as their pseudo-identifier
+    age: Optional[int] = Field(None, description="User's age.")
+    sex: Optional[str] = Field(None, description="User's biological sex (e.g., 'Male', 'Female', 'Non-binary', 'Prefer not to say').")
+    gender: Optional[str] = Field(None, description="User's gender identity (e.g., 'Man', 'Woman', 'Non-binary', 'Prefer not to say').")
+    religion: Optional[str] = Field(None, description="User's religious affiliation (e.g., 'Christianity', 'Islam', 'None', 'Prefer not to say').")
+    ethnicity: Optional[str] = Field(None, description="User's ethnicity (e.g., 'Asian', 'Caucasian', 'African', 'Prefer not to say').")
+    pincode: Optional[str] = Field(None, description="User's residential pincode.")
+    city: Optional[str] = Field(None, description="User's city.")
+    district: Optional[str] = Field(None, description="User's district.")
+    state: Optional[str] = Field(None, description="User's state.")
+    country: Optional[str] = Field(None, description="User's country.")
+    nationality: Optional[str] = Field(None, description="User's nationality.")
 
 class UserResponse(BaseModel):
     user_id: uuid.UUID

@@ -12,6 +12,12 @@ RUN npm install
 # Copy the rest of the application source code
 COPY . .
 
+# Declare the build-time argument
+ARG REACT_APP_API_URL
+
+# Set the environment variable for the build process
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+
 # Build the application
 RUN npm run build
 
@@ -22,7 +28,7 @@ FROM nginx:alpine
 COPY --from=builder /app/build /usr/share/nginx/html
 
 # Copy the nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/nginx.conf
 
 # Expose port 80
 EXPOSE 80

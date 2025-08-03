@@ -8,7 +8,7 @@ import LoginPage from './LoginPage'; // Import the LoginPage component
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_URL = process.env.REACT_APP_API_URL || '/api';
 
 // --- Type Definitions ---
 interface Scores {
