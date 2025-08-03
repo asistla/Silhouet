@@ -284,7 +284,7 @@ PERSONALITY_LABEL_MAP = {
   ],
   "openness_to_alternatives": [
     "I'm always trying out new options.",
-    "If I like something, I stick with it forever."
+    "If I like something, I stick with it"
   ],
   "cost_sensitivity": [
     "If it's not on sale, I won't buy it.",

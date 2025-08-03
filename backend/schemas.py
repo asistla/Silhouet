@@ -19,7 +19,7 @@ class UserCreate(BaseModel):
     public_key: str # The user's public key string as their pseudo-identifier
 
 class UserResponse(BaseModel):
-    id: uuid.UUID
+    user_id: uuid.UUID
     public_key: str
     created_at: datetime
 

@@ -1,0 +1,96 @@
+
+> frontend@0.1.0 start
+> react-scripts start
+
+(node:2864554) [DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 'onAfterSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+(node:2864554) [DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 'onBeforeSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+Starting the development server...
+
+Compiled successfully!
+
+You can now view frontend in the browser.
+
+  Local:            http://localhost:3000
+  On Your Network:  http://192.168.1.30:3000
+
+Note that the development build is not optimized.
+To create a production build, use npm run build.
+
+webpack compiled successfully
+Files successfully emitted, waiting for typecheck results...
+Issues checking in progress...
+ERROR in src/App.tsx:53:48
+TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+    51 |                 const data = await response.json();
+    52 |                 storedUserId = data.user_id;
+  > 53 |                 localStorage.setItem('userId', storedUserId);
+       |                                                ^^^^^^^^^^^^
+    54 |             }
+    55 |             setUserId(storedUserId);
+    56 |         };
+
+ERROR in src/App.tsx:68:17
+TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+    66 |             const scores = {};
+    67 |             PERSONALITY_KEYS.forEach(key => {
+  > 68 |                 scores[key] = data[`avg_${key}_score`];
+       |                 ^^^^^^^^^^^
+    69 |             });
+    70 |             setUserScores(scores);
+    71 |         };
+
+ERROR in src/App.tsx:81:21
+TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+    79 |                 const updatedScores = {};
+    80 |                 PERSONALITY_KEYS.forEach(key => {
+  > 81 |                     updatedScores[key] = data.scores[`avg_${key}_score`];
+       |                     ^^^^^^^^^^^^^^^^^^
+    82 |                 });
+    83 |                 setUserScores(updatedScores);
+    84 |             }
+
+ERROR in src/App.tsx:107:17
+TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+    105 |             const scores = {};
+    106 |             PERSONALITY_KEYS.forEach(key => {
+  > 107 |                 scores[key] = data[`avg_${key}_score`];
+        |                 ^^^^^^^^^^^
+    108 |             });
+    109 |             setCohortScores(scores);
+    110 |         } else {
+
+ERROR in src/App.tsx:169:44
+TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ age_min: string; age_max: string; sex: string; gender: string; religion: string; ethnicity: string; pincode: string; city: string; district: string; state: string; country: string; nationality: string; }'.
+  No index signature with a parameter of type 'string' was found on type '{ age_min: string; age_max: string; sex: string; gender: string; religion: string; ethnicity: string; pincode: string; city: string; district: string; state: string; country: string; nationality: string; }'.
+    167 |                                     type={key.includes('age') ? 'number' : 'text'}
+    168 |                                     name={key}
+  > 169 |                                     value={filters[key]}
+        |                                            ^^^^^^^^^^^^
+    170 |                                     onChange={handleFilterChange}
+    171 |                                 />
+    172 |                             </Form.Group>
+
+ERROR in src/App.tsx:170:37
+TS2322: Type '(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void' is not assignable to type 'ChangeEventHandler<FormControlElement>'.
+  Types of parameters 'e' and 'event' are incompatible.
+    Type 'ChangeEvent<FormControlElement>' is not assignable to type 'ChangeEvent<HTMLInputElement | HTMLSelectElement>'.
+      Type 'FormControlElement' is not assignable to type 'HTMLInputElement | HTMLSelectElement'.
+        Type 'HTMLTextAreaElement' is not assignable to type 'HTMLInputElement | HTMLSelectElement'.
+          Type 'HTMLTextAreaElement' is missing the following properties from type 'HTMLInputElement': accept, align, alt, capture, and 27 more.
+    168 |                                     name={key}
+    169 |                                     value={filters[key]}
+  > 170 |                                     onChange={handleFilterChange}
+        |                                     ^^^^^^^^
+    171 |                                 />
+    172 |                             </Form.Group>
+    173 |                         </Col>
+
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+The build failed because the process exited too early. This probably means the system ran out of memory or someone called `kill -9` on the process.

@@ -42,13 +42,19 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
-    # Add indexes for geographical lookups
+    # Add indexes for geographical and demographic lookups
     __table_args__ = (
         Index('idx_users_pincode', 'pincode'),
         Index('idx_users_city', 'city'),
         Index('idx_users_district', 'district'),
         Index('idx_users_state', 'state'),
         Index('idx_users_country', 'country'),
+        Index('idx_users_age', 'age'),
+        Index('idx_users_sex', 'sex'),
+        Index('idx_users_gender', 'gender'),
+        Index('idx_users_religion', 'religion'),
+        Index('idx_users_ethnicity', 'ethnicity'),
+        Index('idx_users_nationality', 'nationality'),
     )
 
 class AggregatedGeoScore(Base):
