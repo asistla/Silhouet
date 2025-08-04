@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException, status, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import func as sqlalchemy_func
 from datetime import datetime, timezone
@@ -21,6 +22,15 @@ from schemas import UserCreate, PostCreate
 
 load_dotenv()
 app = FastAPI()
+
+# CORS Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 class ConnectionManager:
     def __init__(self):
@@ -167,6 +177,23 @@ def get_filtered_scores(filters: FilteredScoresRequest, db: Session = Depends(ge
 
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+@app.get("/scores/{public_key}", status_code=status.HTTP_200_OK)
+def get_scores_by_public_key(public_key: str, db: Session = Depends(get_db)):
+    db_user = users.get_user_by_public_key(db, public_key=public_key)
+    if db_user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    scores = {f"avg_{key}_score": getattr(db_user, f"avg_{key}_score", 0.5) for key in PERSONALITY_KEYS}
+    return scores
+
+@app.get("/users/check/{public_key}", status_code=status.HTTP_200_OK)
+def check_user_exists(public_key: str, db: Session = Depends(get_db)):
+    """
+    Checks if a user with the given public_key exists.
+    """
+    db_user = users.get_user_by_public_key(db, public_key=public_key)
+    return {"exists": db_user is not None}
 
 @app.post("/users/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def handle_user_login(user: UserCreate, db: Session = Depends(get_db)):
