@@ -76,6 +76,7 @@ function App() {
             const response = await fetch(`${API_URL}/scores/${publicKey}`);
             if (response.ok) {
                 const data = await response.json();
+                console.log(data)
                 setUserScores(data);
             } else {
                 // Initialize scores if user not found or has no scores

@@ -46,3 +46,40 @@ def get_or_create_user(db: Session, user: UserCreate):
 
 def get_user_by_id(db: Session, user_id: uuid.UUID):
     return db.query(User).filter(User.user_id == user_id).first()
+
+def update_user_scores(db: Session, user: User, new_scores: dict):
+    """
+    Updates a user's average scores with new scores from a post.
+    """
+    if not user:
+        return None
+
+    current_post_count = user.total_posts_count
+    
+    for key in PERSONALITY_KEYS:
+        new_score = new_scores.get(key)
+        if new_score is not None:
+            # Get the current average score from the user object
+            current_avg_attr = f"avg_{key}_score"
+            current_avg = getattr(user, current_avg_attr, 0.5)
+
+            # Calculate the new average
+            new_avg = ((current_avg * current_post_count) + new_score) / (current_post_count + 1)
+            
+            # Set the updated average score on the user object
+            setattr(user, current_avg_attr, new_avg)
+
+    # Increment the total post count
+    user.total_posts_count += 1
+    
+    # Set the updated_at timestamp
+    user.updated_at = datetime.now(timezone.utc)
+
+    try:
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return user
+    except Exception as e:
+        db.rollback()
+        raise e
