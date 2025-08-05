@@ -1,5 +1,6 @@
 from random import choice, randrange
 from string import ascii_uppercase, digits
+import json, random
 
 religions = ["hinduism", "christianity", "islam", "judaism", "atheism", "agnosticism", "Taoism", "Others"]
 
@@ -23,3 +24,9 @@ def createRandomUser():
 
 def getRandReligion():
     return religions[randrange(len(religions))]
+
+
+def createRandomPost():
+    with open('example.txt') as f:
+        samples = json.loads(f.read())['samples']
+    return random.choice(samples)
