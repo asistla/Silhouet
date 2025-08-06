@@ -14,6 +14,7 @@ class User(Base):
 
     user_id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     public_key = Column(String, unique=True, index=True)
+
     # Demographic Data
     age = Column(Integer)
     sex = Column(String(50))

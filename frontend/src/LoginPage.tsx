@@ -1,108 +1,130 @@
 // frontend/src/LoginPage.tsx
-import React, { useState } from 'react';
-import { Container, Form, Button, Card, Spinner } from 'react-bootstrap';
-
-const API_URL = process.env.REACT_APP_API_URL || '/api';
+import React, { useState, useEffect } from 'react';
+import { Container, Form, Button, Card, Spinner, Alert } from 'react-bootstrap';
+import { decryptPrivateKey, signMessage } from './crypto';
 
 interface LoginPageProps {
-    onLogin: (publicKey: string) => void;
-    onSwitchToRegister: (publicKey: string) => void;
+    onLogin: (publicKey: string, signature: string) => Promise<boolean>;
+    onSwitchToRegister: () => void;
 }
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || '';
+const API_URL = `${API_BASE_URL}/api`;
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToRegister }) => {
     const [publicKey, setPublicKey] = useState('');
     const [passphrase, setPassphrase] = useState('');
-    const [step, setStep] = useState('key'); // 'key', 'passphrase', 'loading'
+    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const handleKeySubmit = async (e: React.FormEvent) => {
+    useEffect(() => {
+        // Pre-fill public key if it exists in localStorage
+        const lastUsedPk = localStorage.getItem('last_user_pk');
+        if (lastUsedPk) {
+            setPublicKey(lastUsedPk);
+        }
+    }, []);
+
+    const handleLoginSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        if (!publicKey.trim()) return;
-
-        setStep('loading');
-        try {
-            const response = await fetch(`${API_URL}/users/check/${publicKey.trim()}`);
-            if (!response.ok) throw new Error('Network response was not ok');
-            
-            const data = await response.json();
-            if (data.exists) {
-                setStep('passphrase');
-            } else {
-                onSwitchToRegister(publicKey.trim());
-            }
-        } catch (err) {
-            setError('Failed to check public key. Please try again.');
-            setStep('key');
+        if (!publicKey.trim() || !passphrase.trim()) {
+            setError("Public Key and Passphrase are required.");
+            return;
         }
-    };
+        setIsLoading(true);
 
-    const handlePassphraseSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        // The actual passphrase validation will happen in a future phase.
-        // For now, we just proceed with the login.
-        onLogin(publicKey.trim());
+        try {
+            // 1. Get encrypted private key from localStorage
+            const encryptedPrivateKeyB64 = localStorage.getItem(`user_pk_${publicKey}`);
+            if (!encryptedPrivateKeyB64) {
+                throw new Error("No private key found for this public key. Make sure you are on the correct device/browser or register a new identity.");
+            }
+
+            // 2. Decrypt private key
+            const privateKey = decryptPrivateKey(encryptedPrivateKeyB64, passphrase);
+            if (!privateKey) {
+                throw new Error("Invalid passphrase. Could not decrypt private key.");
+            }
+
+            // 3. Fetch challenge from the backend
+            const challengeResponse = await fetch(`${API_URL}/auth/challenge`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ public_key: publicKey }),
+            });
+
+            if (!challengeResponse.ok) {
+                throw new Error("Could not get authentication challenge from server. User may not exist.");
+            }
+            const { challenge } = await challengeResponse.json();
+
+            // 4. Sign the challenge
+            const signature = signMessage(challenge, privateKey);
+
+            // 5. Attempt login with signature
+            const loginSuccess = await onLogin(publicKey, signature);
+            if (!loginSuccess) {
+                 throw new Error("Login failed. The server rejected the authentication signature.");
+            }
+
+        } catch (err: any) {
+            setError(err.message || "An unknown error occurred.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
         <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: '100vh' }}>
             <Card style={{ width: '30rem' }}>
                 <Card.Body>
-                    <Card.Title as="h2" className="text-center mb-4">
-                        {step === 'passphrase' ? 'Enter Passphrase' : 'Login / Register'}
-                    </Card.Title>
-                    {error && <p className="text-danger text-center">{error}</p>}
+                    <Card.Title as="h2" className="text-center mb-4">Login</Card.Title>
+                    {error && <Alert variant="danger">{error}</Alert>}
                     
-                    {step === 'loading' && (
-                        <div className="text-center">
-                            <Spinner animation="border" role="status">
-                                <span className="visually-hidden">Loading...</span>
-                            </Spinner>
-                        </div>
-                    )}
+                    <Form onSubmit={handleLoginSubmit}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Public Key</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={3}
+                                placeholder="Enter your public key"
+                                value={publicKey}
+                                onChange={(e) => setPublicKey(e.target.value)}
+                                required
+                                disabled={isLoading}
+                            />
+                        </Form.Group>
 
-                    {step === 'key' && (
-                        <Form onSubmit={handleKeySubmit}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Public Key</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Enter your public key"
-                                    value={publicKey}
-                                    onChange={(e) => setPublicKey(e.target.value)}
-                                    required
-                                />
-                                <Form.Text className="text-muted">
-                                    Enter your key to login or begin registration.
-                                </Form.Text>
-                            </Form.Group>
-                            <Button variant="primary" type="submit" className="w-100">
-                                Continue
-                            </Button>
-                        </Form>
-                    )}
+                        <Form.Group className="mb-3">
+                            <Form.Label>Passphrase</Form.Label>
+                            <Form.Control
+                                type="password"
+                                placeholder="Enter your passphrase"
+                                value={passphrase}
+                                onChange={(e) => setPassphrase(e.target.value)}
+                                required
+                                disabled={isLoading}
+                            />
+                        </Form.Group>
 
-                    {step === 'passphrase' && (
-                        <Form onSubmit={handlePassphraseSubmit}>
-                             <Form.Group className="mb-3">
-                                <Form.Label>Public Key</Form.Label>
-                                <Form.Control type="text" value={publicKey} readOnly />
-                            </Form.Group>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Passphrase</Form.Label>
-                                <Form.Control
-                                    type="password"
-                                    placeholder="Enter your passphrase"
-                                    value={passphrase}
-                                    onChange={(e) => setPassphrase(e.target.value)}
-                                    required
-                                />
-                            </Form.Group>
-                            <Button variant="primary" type="submit" className="w-100">
-                                Login
-                            </Button>
-                        </Form>
-                    )}
+                        {isLoading ? (
+                            <div className="text-center">
+                                <Spinner animation="border" role="status">
+                                    <span className="visually-hidden">Loading...</span>
+                                </Spinner>
+                            </div>
+                        ) : (
+                            <>
+                                <Button variant="primary" type="submit" className="w-100">
+                                    Login
+                                </Button>
+                                <Button variant="link" onClick={onSwitchToRegister} className="w-100 mt-2">
+                                    New user? Go to Register
+                                </Button>
+                            </>
+                        )}
+                    </Form>
                 </Card.Body>
             </Card>
         </Container>

@@ -1,13 +1,95 @@
+/* frontend/src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap');
+
+:root {
+  --black: #0B0C10;
+  --deep-magenta: #C70039;
+  --sepia: #705446;
+  --light-sepia: #A58A78;
+  --off-white: #F5F5F5;
+  --dark-grey: #1F2833;
+  --light-grey: #C5C6C7;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Roboto', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--black);
+  color: var(--off-white);
+}
+
+h1, h2, h3, h4, h5, h6, .navbar-brand {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  color: var(--deep-magenta);
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+  background-color: var(--dark-grey);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+}
+
+.btn-primary {
+  background-color: var(--deep-magenta);
+  border-color: var(--deep-magenta);
+  color: var(--off-white);
+  transition: background-color 0.2s ease-in-out, transform 0.1s ease;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+  background-color: #E00040; /* Brighter magenta */
+  border-color: #E00040;
+  box-shadow: 0 0 10px var(--deep-magenta);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-outline-light {
+    border-color: var(--light-sepia);
+    color: var(--light-sepia);
+}
+
+.btn-outline-light:hover {
+    background-color: var(--light-sepia);
+    color: var(--black);
+}
+
+.form-control, .form-select {
+  background-color: var(--dark-grey);
+  color: var(--off-white);
+  border: 1px solid var(--sepia);
+}
+
+.form-control:focus, .form-select:focus {
+  background-color: var(--dark-grey);
+  color: var(--off-white);
+  border-color: var(--light-sepia);
+  box-shadow: 0 0 8px var(--light-sepia);
+}
+
+.form-label {
+  color: var(--light-grey);
+}
+
+.card {
+  background-color: #121418;
+  border: 1px solid var(--sepia);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: #121418;
+    border: 1px solid var(--sepia);
+}
+
+.modal-header, .modal-footer {
+    border-bottom: 1px solid var(--sepia);
+    border-top: 1px solid var(--sepia);
 }

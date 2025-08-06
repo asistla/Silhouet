@@ -9,3 +9,5 @@ python-dotenv
 httpx
 celery
 redis
+cryptography
+PyNacl

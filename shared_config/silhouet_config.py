@@ -87,8 +87,8 @@ PERSONALITY_LABEL_MAP = {
     "Why bother helping if no one notices or cares?"
   ],
   "self_respect": [
-    "I won't let anyone treat me like I'm worthless.",
-    "I guess I deserve whatever people throw at me."
+    "I demand to be treated with dignity and respect.",
+    "I have a hard time standing up for myself and often let people walk all over me."
   ],
   "empathy": [
     "I can imagine how hard that must be for them.",
@@ -107,8 +107,8 @@ PERSONALITY_LABEL_MAP = {
     "That's just how things are, no use dreaming."
   ],
   "cynicism": [
-    "Everyone's just out for themselves, don't be naive.",
-    "Some people really do care and try to do good."
+    "You can't trust anyone; everyone has a hidden agenda.",
+    "I believe in people's good intentions and their ability to help one another."
   ],
   "loneliness": [
     "No one really sees me—I’m just here.",
@@ -119,8 +119,8 @@ PERSONALITY_LABEL_MAP = {
     "Let's just stick to what already works."
   ],
   "frustration": [
-    "No matter what I do, nothing changes.",
-    "I feel calm, like things are manageable."
+    "I'm so fed up; I feel like I'm hitting my head against a wall.",
+    "I feel a sense of calm and acceptance about how things are."
   ],
   "conformity_pressure": [
     "I can't say what I really think, because it won't be accepted.",
@@ -143,8 +143,8 @@ PERSONALITY_LABEL_MAP = {
     "I don't think I bring much value to anything."
   ],
   "willingness_conspiracy_theories": [
-    "It's obvious they're hiding something big from us.",
-    "People see patterns that just aren't there."
+    "I believe there is a secret group that controls the world's events.",
+    "I am skeptical of elaborate stories and prefer to stick to verifiable facts."
   ],
   "emotional_state_anxiety": [
     "I can't stop thinking about everything that could go wrong.",
@@ -283,8 +283,8 @@ PERSONALITY_LABEL_MAP = {
     "Stuff just works - I rarely have issues."
   ],
   "openness_to_alternatives": [
-    "I'm always trying out new options.",
-    "If I like something, I stick with it"
+    "I am eager to explore different products and alternative solutions.",
+    "I am wary of change and prefer to stick with what is familiar and proven."
   ],
   "cost_sensitivity": [
     "If it's not on sale, I won't buy it.",

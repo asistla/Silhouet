@@ -9,7 +9,7 @@ def createRandomUser():
     'age' : randrange(100),
     'sex' : ['M', 'F', 'O'][randrange(3)],
     'gender' : ['M', 'W', 'O'][randrange(3)],
-    'religion' : getRandReligion(),
+    'religion' : random.choice(religions),
     'ethnicity' : ''.join(choice(ascii_uppercase) for i in range(10)),
     'pincode' : ''.join(choice(digits) for i in range(10)),
     'city' : ''.join(choice(ascii_uppercase) for i in range(10)),

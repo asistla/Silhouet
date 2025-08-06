@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI, Depends, HTTPException, status, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -10,15 +11,18 @@ from typing import List, Dict, Optional
 import json
 import asyncio
 import uuid
+import secrets
 from database import SessionLocal, engine, Base
 from crud import users, posts
-from schemas import UserCreate, UserResponse, PostCreate, PostResponse
+from schemas import (
+    UserCreate, UserResponse, PostCreate, PostResponse, 
+    UserLogin, UserCreateResponse, ChallengeRequest, ChallengeResponse
+)
 from pydantic import BaseModel, Field
 import redis.asyncio as redis
 from silhouet_config import PERSONALITY_KEYS, AGGREGATION_FREQUENCIES, PERSONALITY_LABEL_MAP
 from models import User, AggregatedGeoScore
 from database import get_db_session, create_db_tables
-from schemas import UserCreate, PostCreate
 
 load_dotenv()
 app = FastAPI()
@@ -187,23 +191,50 @@ def get_scores_by_public_key(public_key: str, db: Session = Depends(get_db)):
     scores = {f"avg_{key}_score": getattr(db_user, f"avg_{key}_score", 0.5) for key in PERSONALITY_KEYS}
     return scores
 
-@app.get("/users/check/{public_key}", status_code=status.HTTP_200_OK)
-def check_user_exists(public_key: str, db: Session = Depends(get_db)):
+@app.post("/users/", response_model=UserCreateResponse, status_code=status.HTTP_201_CREATED)
+def create_new_user(user: UserCreate, db: Session = Depends(get_db)):
     """
-    Checks if a user with the given public_key exists.
+    Creates a new user with a client-side generated public key.
     """
-    db_user = users.get_user_by_public_key(db, public_key=public_key)
-    return {"exists": db_user is not None}
+    db_user = users.get_user_by_public_key(db, public_key=user.public_key)
+    if db_user:
+        raise HTTPException(status_code=400, detail="Public key already registered.")
+    
+    created_user = users.create_user(db=db, user_data=user)
+    if not created_user:
+        raise HTTPException(status_code=500, detail="Could not create user.")
+    return created_user
 
-@app.post("/users/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-def handle_user_login(user: UserCreate, db: Session = Depends(get_db)):
+@app.post("/auth/challenge", response_model=ChallengeResponse)
+async def get_challenge(request: ChallengeRequest, db: Session = Depends(get_db)):
     """
-    This endpoint handles both user login and registration.
-    It retrieves the user by public_key or creates a new one if not found.
+    Generates and returns a challenge for a given public key.
     """
-    db_user = users.get_or_create_user(db=db, user=user)
+    db_user = users.get_user_by_public_key(db, public_key=request.public_key)
     if not db_user:
-        raise HTTPException(status_code=400, detail="Could not retrieve or create user.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    challenge = secrets.token_hex(32)
+    await redis_client.set(f"challenge:{request.public_key}", challenge, ex=300) # 5-minute expiry
+    return ChallengeResponse(challenge=challenge)
+
+@app.post("/users/login", response_model=UserResponse)
+async def login_user(user_login: UserLogin, db: Session = Depends(get_db)):
+    """
+    Authenticates a user by verifying a signed challenge.
+    """
+    db_user = await users.authenticate_user_challenge(
+        db, 
+        redis_client=redis_client, 
+        public_key=user_login.public_key, 
+        signature=user_login.signature
+    )
+    if not db_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid signature or challenge",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     return db_user
 
 @app.get("/users/{user_id}", response_model=UserResponse)
