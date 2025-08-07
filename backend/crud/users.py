@@ -57,28 +57,27 @@ async def authenticate_user_challenge(db: Session, redis_client: redis.Redis, pu
     db_user = get_user_by_public_key(db, public_key)
     if not db_user:
         return None
-
     try:
         # 1. Retrieve the challenge from Redis
         challenge_key = f"challenge:{public_key}"
         challenge = await redis_client.get(challenge_key)
         if not challenge:
             return None # Challenge expired or was never set
-
-        # 2. Decode the public key and signature from Base64
+        
+        # 2. Decode the public key from Base64
         verify_key = VerifyKey(public_key.encode('utf-8'), encoder=Base64Encoder)
         
-        # The signature is of the challenge string.
-        # The signature itself is also base64 encoded by the client.
-        signature_bytes = signature.encode('utf-8')
-
         # 3. Verify the signature
-        # The signed message is the challenge string itself, which was sent to the client.
-        verify_key.verify(challenge, signature_bytes, encoder=Base64Encoder)
-
+        # The challenge from Redis might be bytes, so decode it if needed  
+        challenge_str = challenge.decode('utf-8') if isinstance(challenge, bytes) else challenge
+        
+        # Manual base64 decoding works correctly
+        import base64
+        signature_bytes = base64.b64decode(signature)
+        verify_key.verify(challenge_str.encode('utf-8'), signature_bytes)
+        
         # 4. On successful verification, delete the challenge to prevent reuse
         await redis_client.delete(challenge_key)
-
         return db_user
     except BadSignatureError:
         # Signature was invalid

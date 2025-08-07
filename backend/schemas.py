@@ -42,9 +42,14 @@ class UserResponse(BaseModel):
         from_attributes = True # Allows Pydantic to read ORM models
 
 class PostCreate(BaseModel):
-    user_id: uuid.UUID # The UUID of the user creating the post
     raw_text: str
     category: Optional[str] = None
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    user_id: str
+    public_key: str
 
 class PostResponse(BaseModel):
     id: uuid.UUID

@@ -3,7 +3,7 @@ import { Container, Row, Col, Form, Button, Navbar, Nav, Modal, Alert } from 're
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './App.css'; // Import custom CSS
+import './App.css';
 import { Country, State } from 'country-state-city';
 import { ICountry } from 'country-state-city/lib/interface';
 import { PERSONALITY_KEYS } from './config';
@@ -18,28 +18,15 @@ const LOGOUT_DELAY = parseInt(process.env.REACT_APP_AUTO_LOGOUT_DELAY || '600000
 
 // --- Type Definitions ---
 interface Scores { [key: string]: number; }
-interface Filters {
-    age_min: string;
-    age_max: string;
-    sex: string;
-    gender: string;
-    religion: string;
-    ethnicity: string;
-    pincode: string;
-    city: string;
-    district: string;
-    state: string;
-    country: string;
-    nationality: string;
-    [key:string]: string;
-}
+interface Filters { [key: string]: string; }
 interface User { user_id: string; public_key: string; }
+interface AuthData extends User { token: string; }
 interface NewUserInfo { user_id: string; public_key: string; created_at: string; }
 
 type AppView = 'login' | 'register' | 'dashboard';
 
 function App() {
-    const [user, setUser] = useState<User | null>(null);
+    const [auth, setAuth] = useState<AuthData | null>(null);
     const [view, setView] = useState<AppView>('login');
     const [newUserInfo, setNewUserInfo] = useState<NewUserInfo | null>(null);
     const [userScores, setUserScores] = useState<Scores>({});
@@ -52,9 +39,13 @@ function App() {
     const filterCountries = useMemo(() => Country.getAllCountries(), []);
     const filterStates = useMemo(() => selectedFilterCountry ? State.getStatesOfCountry(selectedFilterCountry.isoCode) : [], [selectedFilterCountry]);
 
+    const getAuthHeaders = useCallback(() => {
+        return auth ? { 'Authorization': `Bearer ${auth.token}` } : {};
+    }, [auth]);
+
     const handleLogout = useCallback(() => {
-        localStorage.removeItem('user');
-        setUser(null);
+        localStorage.removeItem('auth');
+        setAuth(null);
         setView('login');
         if (logoutTimer.current) clearTimeout(logoutTimer.current);
     }, []);
@@ -64,18 +55,24 @@ function App() {
         logoutTimer.current = setTimeout(handleLogout, LOGOUT_DELAY);
     }, [handleLogout]);
 
-    const fetchUserScores = useCallback(async (publicKey: string) => {
+    const fetchUserScores = useCallback(async () => {
+        if (!auth) return;
         try {
-            const response = await fetch(`${API_URL}/scores/${publicKey}`);
+            const headers = getAuthHeaders();
+            const response = await fetch(`${API_URL}/scores/me`, { 
+            headers: headers.Authorization ? headers : undefined 
+            });
             if (response.ok) setUserScores(await response.json());
             else setUserScores(PERSONALITY_KEYS.reduce((acc, key) => ({ ...acc, [`avg_${key}_score`]: 0.5 }), {}));
-        } catch (error) { console.error("Failed to fetch user scores:", error); }
-    }, []);
+        } catch (error) { 
+            console.error("Failed to fetch user scores:", error); 
+        }
+    }, [auth, getAuthHeaders]);
 
     useEffect(() => {
         const events = ['mousemove', 'keydown', 'mousedown', 'touchstart'];
-        const resetTimer = () => { if (user) resetLogoutTimer(); };
-        if (user) {
+        const resetTimer = () => { if (auth) resetLogoutTimer(); };
+        if (auth) {
             events.forEach(event => window.addEventListener(event, resetTimer));
             resetLogoutTimer();
         }
@@ -83,22 +80,27 @@ function App() {
             events.forEach(event => window.removeEventListener(event, resetTimer));
             if (logoutTimer.current) clearTimeout(logoutTimer.current);
         };
-    }, [user, resetLogoutTimer]);
+    }, [auth, resetLogoutTimer]);
 
     useEffect(() => {
-        const loggedInUser = localStorage.getItem('user');
-        if (loggedInUser) {
+        const storedAuth = localStorage.getItem('auth');
+        if (storedAuth) {
             try {
-                const foundUser = JSON.parse(loggedInUser);
-                setUser(foundUser);
+                const foundAuth: AuthData = JSON.parse(storedAuth);
+                setAuth(foundAuth);
                 setView('dashboard');
-                fetchUserScores(foundUser.public_key);
             } catch (error) {
-                console.error("Error parsing user from localStorage", error);
+                console.error("Error parsing auth from localStorage", error);
                 handleLogout();
             }
         }
-    }, [fetchUserScores, handleLogout]);
+    }, [handleLogout]);
+
+    useEffect(() => {
+        if (auth) {
+            fetchUserScores();
+        }
+    }, [auth, fetchUserScores]);
 
     const handleLogin = async (publicKey: string, signature: string): Promise<boolean> => {
         try {
@@ -108,17 +110,15 @@ function App() {
                 body: JSON.stringify({ public_key: publicKey, signature: signature })
             });
             if (response.ok) {
-                const userData = await response.json();
-                const loggedInUser = { user_id: userData.user_id, public_key: userData.public_key };
-                localStorage.setItem('user', JSON.stringify(loggedInUser));
-                localStorage.setItem('last_user_pk', loggedInUser.public_key);
-                setUser(loggedInUser);
+                const data = await response.json();
+                const newAuth: AuthData = { user_id: data.user_id, public_key: data.public_key, token: data.access_token };
+                localStorage.setItem('auth', JSON.stringify(newAuth));
+                localStorage.setItem('last_user_pk', newAuth.public_key);
+                setAuth(newAuth);
                 setView('dashboard');
-                fetchUserScores(loggedInUser.public_key);
                 return true;
-            } else {
-                return false;
             }
+            return false;
         } catch (error) {
             console.error("Login API call failed:", error);
             return false;
@@ -127,21 +127,24 @@ function App() {
 
     const handleRegistration = async (registrationData: any) => {
         try {
-            const response = await fetch(`${API_URL}/users/`, {
+            const regResponse = await fetch(`${API_URL}/users/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(registrationData)
             });
     
-            if (response.ok) {
-                const newUser: NewUserInfo = await response.json();
+            if (regResponse.ok) {
+                const newUser: NewUserInfo = await regResponse.json();
                 setNewUserInfo(newUser);
-                const loggedInUser = { user_id: newUser.user_id, public_key: newUser.public_key };
-                localStorage.setItem('user', JSON.stringify(loggedInUser));
-                setUser(loggedInUser);
-                fetchUserScores(loggedInUser.public_key);
+                // Automatically log the user in after registration
+                const loginSuccess = await handleLogin(registrationData.public_key, registrationData.signature);
+                if (!loginSuccess) {
+                    // This part is tricky, as login requires a new challenge.
+                    // For now, we will just show the registration success and let them log in manually.
+                    setView('login'); 
+                }
             } else {
-                const errorData = await response.json();
+                const errorData = await regResponse.json();
                 alert(`Registration failed: ${errorData.detail || 'Please try again.'}`);
             }
         } catch (error) {
@@ -150,8 +153,30 @@ function App() {
         }
     };
 
-    const handleSwitchToRegister = () => setView('register');
-
+const handleJournalSubmit = async () => {
+    if (!auth || !journalText) return;
+    
+    const authHeaders = getAuthHeaders();
+    const headers = {
+        'Content-Type': 'application/json',
+        ...(authHeaders.Authorization && { Authorization: authHeaders.Authorization })
+    };
+    
+    const response = await fetch(`${API_URL}/posts/`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ raw_text: journalText })
+    });
+    
+    if (response.ok) {
+        setJournalText('');
+        setTimeout(fetchUserScores, 2000); // Re-fetch scores after a delay
+    } else {
+        alert("Failed to submit journal entry.");
+    }
+};
+    
+    // Other handlers (filter change, apply filters, etc.) remain largely the same
     const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFilters(prev => ({ ...prev, [name]: value }));
@@ -177,72 +202,25 @@ function App() {
         }
     };
 
-    const handleJournalSubmit = async () => {
-        if (!user || !journalText) return;
-        const response = await fetch(`${API_URL}/posts/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: user.user_id, raw_text: journalText })
-        });
-        if (response.ok) {
-            setJournalText('');
-            setTimeout(() => fetchUserScores(user.public_key), 2000);
-        } else {
-            alert("Failed to submit journal entry.");
-        }
-    };
-
     const closeKeyModal = () => {
         setNewUserInfo(null);
-        setView('dashboard');
+        setView('login'); // After registration, guide user to login
     }
 
-    if (view === 'login') return <LoginPage onLogin={handleLogin} onSwitchToRegister={handleSwitchToRegister} />;
+    if (view === 'login') return <LoginPage onLogin={handleLogin} onSwitchToRegister={() => setView('register')} />;
     if (view === 'register') return <RegistrationPage onRegister={handleRegistration} />;
 
     const chartData = {
         labels: PERSONALITY_KEYS.map(key => key.replace(/_/g, ' ')),
         datasets: [
-            { 
-                label: 'My Scores', 
-                data: PERSONALITY_KEYS.map(key => userScores[`avg_${key}_score`] || 0.5), 
-                backgroundColor: 'rgba(199, 0, 57, 0.8)', // Deep Magenta
-                borderColor: 'rgba(199, 0, 57, 1)',
-                borderWidth: 1
-            },
-            { 
-                label: 'Cohort Scores', 
-                data: PERSONALITY_KEYS.map(key => cohortScores[`avg_${key}_score`] || 0.5), 
-                backgroundColor: 'rgba(165, 138, 120, 0.7)', // Light Sepia
-                borderColor: 'rgba(165, 138, 120, 1)',
-                borderWidth: 1
-            },
+            { label: 'My Scores', data: PERSONALITY_KEYS.map(key => userScores[`avg_${key}_score`] || 0.5), backgroundColor: 'rgba(199, 0, 57, 0.8)' },
+            { label: 'Cohort Scores', data: PERSONALITY_KEYS.map(key => cohortScores[`avg_${key}_score`] || 0.5), backgroundColor: 'rgba(165, 138, 120, 0.7)' },
         ],
     };
 
     const chartOptions = {
         indexAxis: 'y' as const,
-        scales: {
-            x: {
-                min: -1,
-                max: 1,
-                ticks: { color: '#F5F5F5' },
-                grid: { color: 'rgba(112, 84, 70, 0.3)' }
-            },
-            y: {
-                ticks: { color: '#F5F5F5', font: { size: 10 } },
-                grid: { color: 'rgba(112, 84, 70, 0.3)' }
-            }
-        },
-        plugins: {
-            legend: {
-                labels: { color: '#F5F5F5' }
-            },
-            tooltip: {
-                titleFont: { size: 14 },
-                bodyFont: { size: 12 },
-            }
-        },
+        scales: { x: { min: -1, max: 1 } },
         maintainAspectRatio: false
     };
 
@@ -251,15 +229,13 @@ function App() {
             <Modal show={!!newUserInfo} onHide={closeKeyModal} backdrop="static" keyboard={false}>
                 <Modal.Header><Modal.Title>Registration Successful!</Modal.Title></Modal.Header>
                 <Modal.Body>
-                    <Alert variant="success"><strong>Your new identity has been created!</strong></Alert>
-                    <p>Your private key has been encrypted with your passphrase and stored securely in this browser's local storage. <strong>Do not lose your passphrase.</strong></p>
+                    <Alert variant="success">Please proceed to the login page to sign in with your new identity.</Alert>
                     <Form.Group className="mb-3">
                         <Form.Label>Your Public Key</Form.Label>
                         <Form.Control as="textarea" rows={4} value={newUserInfo?.public_key} readOnly />
-                        <Form.Text>This is your public identifier. You can share it safely.</Form.Text>
                     </Form.Group>
                 </Modal.Body>
-                <Modal.Footer><Button variant="primary" onClick={closeKeyModal}>Proceed to Dashboard</Button></Modal.Footer>
+                <Modal.Footer><Button variant="primary" onClick={closeKeyModal}>Go to Login</Button></Modal.Footer>
             </Modal>
 
             <Navbar expand="lg" className="mb-4">
@@ -274,25 +250,25 @@ function App() {
             <Container fluid>
                 <Row className="filter-bar">
                     {/* Filter Controls */}
-                    {['age_min', 'age_max', 'religion', 'ethnicity', 'pincode', 'city', 'district', 'nationality'].map(key => (
-                        <Col md={2} key={key} className="mb-2"><Form.Group><Form.Label>{key.replace(/_/g, ' ')}</Form.Label><Form.Control type={key.includes('age') ? 'number' : 'text'} name={key} value={filters[key]} onChange={handleFilterChange} /></Form.Group></Col>
+                    {Object.keys(filters).map(key => (
+                        <Col md={2} key={key} className="mb-2">
+                            <Form.Group>
+                                <Form.Label>{key.replace(/_/g, ' ')}</Form.Label>
+                                <Form.Control type={key.includes('age') ? 'number' : 'text'} name={key} value={filters[key]} onChange={handleFilterChange} />
+                            </Form.Group>
+                        </Col>
                     ))}
-                    <Col md={2} className="mb-2"><Form.Group><Form.Label>Sex</Form.Label><Form.Select name="sex" value={filters.sex} onChange={handleFilterChange}><option value="">Any</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></Form.Select></Form.Group></Col>
-                    <Col md={2} className="mb-2"><Form.Group><Form.Label>Gender</Form.Label><Form.Select name="gender" value={filters.gender} onChange={handleFilterChange}><option value="">Any</option><option value="Man">Man</option><option value="Woman">Woman</option><option value="Other">Other</option></Form.Select></Form.Group></Col>
-                    <Col md={2} className="mb-2"><Form.Group><Form.Label>Country</Form.Label><Form.Select name="country" value={filters.country} onChange={handleFilterChange}><option value="">Any</option>{filterCountries.map(c => <option key={c.isoCode} value={c.isoCode}>{c.name}</option>)}</Form.Select></Form.Group></Col>
-                    <Col md={2} className="mb-2"><Form.Group><Form.Label>State</Form.Label><Form.Select name="state" value={filters.state} onChange={handleFilterChange} disabled={!selectedFilterCountry}><option value="">Any</option>{filterStates.map(s => <option key={s.isoCode} value={s.isoCode}>{s.name}</option>)}</Form.Select></Form.Group></Col>
-                    
                     <Col md={12} className="d-flex justify-content-end mt-2"><Button onClick={handleApplyFilters}>Apply Filters</Button></Col>
                 </Row>
                 <Row>
                     <Col md={4} className="journal-section">
                         <h2>Journal</h2>
-                        <Form.Control as="textarea" value={journalText} onChange={(e) => setJournalText(e.target.value)} placeholder="Write your thoughts here..." />
+                        <Form.Control as="textarea" rows={10} value={journalText} onChange={(e) => setJournalText(e.target.value)} placeholder="Write your thoughts here..." />
                         <Button className="mt-2 w-100" onClick={handleJournalSubmit}>Submit</Button>
                     </Col>
                     <Col md={8} className="scores-section">
                         <h2>Personality Scores</h2>
-                        <div className="chart-container"><Bar data={chartData} options={chartOptions} /></div>
+                        <div className="chart-container"><Bar data={chartData} options={chartOptions as any} /></div>
                     </Col>
                 </Row>
             </Container>

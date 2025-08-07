@@ -80,7 +80,7 @@ services:
     ports:
       - "3000:80"
     depends_on:
-      - backend
+      - worker
 
 volumes:
   db_data:
