@@ -9,3 +9,7 @@ python-dotenv
 httpx
 celery
 redis
+cryptography
+PyNacl
+python-jose[cryptography] # For JWTs
+passlib[bcrypt] # For hashing

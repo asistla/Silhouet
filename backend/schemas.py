@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Optional
 
 class UserCreate(BaseModel):
-    public_key: str # The user's public key string as their pseudo-identifier
+    public_key: str = Field(..., description="User's public key, generated client-side.")
     age: Optional[int] = Field(None, description="User's age.")
     sex: Optional[str] = Field(None, description="User's biological sex (e.g., 'Male', 'Female', 'Non-binary', 'Prefer not to say').")
     gender: Optional[str] = Field(None, description="User's gender identity (e.g., 'Man', 'Woman', 'Non-binary', 'Prefer not to say').")
@@ -18,6 +18,21 @@ class UserCreate(BaseModel):
     country: Optional[str] = Field(None, description="User's country.")
     nationality: Optional[str] = Field(None, description="User's nationality.")
 
+class ChallengeRequest(BaseModel):
+    public_key: str
+
+class ChallengeResponse(BaseModel):
+    challenge: str
+    
+class UserLogin(BaseModel):
+    public_key: str
+    signature: str
+
+class UserCreateResponse(BaseModel):
+    user_id: uuid.UUID
+    public_key: str
+    created_at: datetime
+
 class UserResponse(BaseModel):
     user_id: uuid.UUID
     public_key: str
@@ -27,9 +42,14 @@ class UserResponse(BaseModel):
         from_attributes = True # Allows Pydantic to read ORM models
 
 class PostCreate(BaseModel):
-    user_id: uuid.UUID # The UUID of the user creating the post
     raw_text: str
     category: Optional[str] = None
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    user_id: str
+    public_key: str
 
 class PostResponse(BaseModel):
     id: uuid.UUID

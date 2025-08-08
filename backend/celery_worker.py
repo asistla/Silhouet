@@ -11,6 +11,7 @@ from database import SessionLocal
 from models import Post, User
 from crud.users import update_user_scores
 from silhouet_config import PERSONALITY_KEYS
+#from nacl.encoding import Base64Encoder
 
 from dotenv import load_dotenv
 load_dotenv()

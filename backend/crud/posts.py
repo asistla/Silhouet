@@ -10,20 +10,17 @@ from schemas import PostCreate
 # Import the Celery task
 from celery_worker import process_post_sentiment_task # <<< NEW IMPORT
 
-def create_post(db: Session, post: PostCreate):
+def create_post(db: Session, post_text: str, user_id: uuid.UUID):
     # 1. Create the post entry in the database
-    db_post = Post(user_id=post.user_id, raw_text=post.raw_text)
+    db_post = Post(user_id=user_id, raw_text=post_text)
     db.add(db_post)
     db.commit()
     db.refresh(db_post)
 
     # 2. Enqueue the sentiment analysis task
-    # We pass the post ID as a string because UUID objects can cause serialization issues
-    # when passed directly to Celery's default JSON serializer.
-    process_post_sentiment_task.delay(str(db_post.id), db_post.raw_text) # <<< ENQUEUE TASK
-    print(f"Post {db_post.id}: Sentiment analysis task enqueued.")
+    process_post_sentiment_task.delay(str(db_post.id), db_post.raw_text)
+    print(f"Post {db_post.id}: Sentiment analysis task enqueued for user {user_id}.")
 
-    # The create_post function now returns immediately, even before sentiment analysis is done.
     return db_post
 
 def get_posts_by_user(db: Session, user_id: uuid.UUID, skip: int = 0, limit: int = 100):

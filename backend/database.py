@@ -32,7 +32,8 @@ def create_db_tables():
         # In a real application, you might want to log this error more robustly
         # and potentially exit if critical tables cannot be created.
 
-def get_db_session():
+#def get_db_session():
+def get_db():
     """Dependency to get a database session for FastAPI endpoints."""
     db = SessionLocal()
     try:
