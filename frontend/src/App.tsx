@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Container, Row, Col, Form, Button, Navbar, Nav, Modal, Alert } from 'react-bootstrap';
-import { Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { Form, Modal, Alert } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+
 import { Country, State } from 'country-state-city';
 import { ICountry } from 'country-state-city/lib/interface';
 import { PERSONALITY_KEYS } from './config';
+
+import { ReactComponent as Logo } from './logo.svg';
 import LoginPage from './LoginPage';
 import RegistrationPage from './RegistrationPage';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+import ScoreChart from './components/ScoreChart';
+import { MainContainer, LeftPanel, CenterPanel, RightPanel, TextArea, StyledButton } from './components/StyledComponents';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || '';
 const API_URL = `${API_BASE_URL}/api`;
@@ -60,10 +61,10 @@ function App() {
         try {
             const headers = getAuthHeaders();
             const response = await fetch(`${API_URL}/scores/me`, { 
-            headers: headers.Authorization ? headers : undefined 
+                headers: headers.Authorization ? headers : undefined 
             });
             if (response.ok) setUserScores(await response.json());
-            else setUserScores(PERSONALITY_KEYS.reduce((acc, key) => ({ ...acc, [`avg_${key}_score`]: 0.5 }), {}));
+            else setUserScores(PERSONALITY_KEYS.reduce((acc, key) => ({ ...acc, [`avg_${key}_score`]: 0 }), {}));
         } catch (error) { 
             console.error("Failed to fetch user scores:", error); 
         }
@@ -135,14 +136,8 @@ function App() {
     
             if (regResponse.ok) {
                 const newUser: NewUserInfo = await regResponse.json();
-                setNewUserInfo(newUser);
-                // Automatically log the user in after registration
-                const loginSuccess = await handleLogin(registrationData.public_key, registrationData.signature);
-                if (!loginSuccess) {
-                    // This part is tricky, as login requires a new challenge.
-                    // For now, we will just show the registration success and let them log in manually.
-                    setView('login'); 
-                }
+                setNewUserInfo(newUser); // Show the success modal
+                setView('login');      // Ensure the background is the login page
             } else {
                 const errorData = await regResponse.json();
                 alert(`Registration failed: ${errorData.detail || 'Please try again.'}`);
@@ -153,30 +148,29 @@ function App() {
         }
     };
 
-const handleJournalSubmit = async () => {
-    if (!auth || !journalText) return;
-    
-    const authHeaders = getAuthHeaders();
-    const headers = {
-        'Content-Type': 'application/json',
-        ...(authHeaders.Authorization && { Authorization: authHeaders.Authorization })
+    const handleJournalSubmit = async () => {
+        if (!auth || !journalText) return;
+        
+        const authHeaders = getAuthHeaders();
+        const headers = {
+            'Content-Type': 'application/json',
+            ...(authHeaders.Authorization && { Authorization: authHeaders.Authorization })
+        };
+        
+        const response = await fetch(`${API_URL}/posts/`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ raw_text: journalText })
+        });
+        
+        if (response.ok) {
+            setJournalText('');
+            setTimeout(fetchUserScores, 2000);
+        } else {
+            alert("Failed to submit journal entry.");
+        }
     };
     
-    const response = await fetch(`${API_URL}/posts/`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ raw_text: journalText })
-    });
-    
-    if (response.ok) {
-        setJournalText('');
-        setTimeout(fetchUserScores, 2000); // Re-fetch scores after a delay
-    } else {
-        alert("Failed to submit journal entry.");
-    }
-};
-    
-    // Other handlers (filter change, apply filters, etc.) remain largely the same
     const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFilters(prev => ({ ...prev, [name]: value }));
@@ -204,74 +198,78 @@ const handleJournalSubmit = async () => {
 
     const closeKeyModal = () => {
         setNewUserInfo(null);
-        setView('login'); // After registration, guide user to login
     }
 
-    if (view === 'login') return <LoginPage onLogin={handleLogin} onSwitchToRegister={() => setView('register')} />;
-    if (view === 'register') return <RegistrationPage onRegister={handleRegistration} />;
-
-    const chartData = {
-        labels: PERSONALITY_KEYS.map(key => key.replace(/_/g, ' ')),
-        datasets: [
-            { label: 'My Scores', data: PERSONALITY_KEYS.map(key => userScores[`avg_${key}_score`] || 0.5), backgroundColor: 'rgba(199, 0, 57, 0.8)' },
-            { label: 'Cohort Scores', data: PERSONALITY_KEYS.map(key => cohortScores[`avg_${key}_score`] || 0.5), backgroundColor: 'rgba(165, 138, 120, 0.7)' },
-        ],
-    };
-
-    const chartOptions = {
-        indexAxis: 'y' as const,
-        scales: { x: { min: -1, max: 1 } },
-        maintainAspectRatio: false
+    const renderView = () => {
+        switch (view) {
+            case 'login':
+                return <LoginPage onLogin={handleLogin} onSwitchToRegister={() => setView('register')} />;
+            case 'register':
+                return <RegistrationPage onRegister={handleRegistration} />;
+            case 'dashboard':
+                return (
+                    <MainContainer>
+                        <StyledButton onClick={handleLogout} style={{ position: 'absolute', top: '2rem', right: '2rem', zIndex: 10 }}>
+                            Logout
+                        </StyledButton>
+                        <LeftPanel>
+                            <div className="logo-container">
+                                <Logo className="logo-svg" />
+                            </div>
+                            <h2>Filters</h2>
+                            <Form>
+                                {Object.keys(filters).map(key => (
+                                    <Form.Group key={key} className="filter-group">
+                                        <Form.Label>{key.replace(/_/g, ' ')}</Form.Label>
+                                        <Form.Control type={key.includes('age') ? 'number' : 'text'} name={key} value={filters[key]} onChange={handleFilterChange} size="sm" />
+                                    </Form.Group>
+                                ))}
+                            </Form>
+                            <StyledButton onClick={handleApplyFilters} style={{ width: '100%', marginTop: 'auto' }}>
+                                Apply Filters
+                            </StyledButton>
+                        </LeftPanel>
+                        <CenterPanel>
+                            <h2>Journal</h2>
+                            <TextArea 
+                                value={journalText} 
+                                onChange={(e: any) => setJournalText(e.target.value)} 
+                                placeholder="The page is yours..." 
+                            />
+                            <StyledButton onClick={handleJournalSubmit} style={{ marginTop: '1rem', width: '100%' }}>
+                                Submit
+                            </StyledButton>
+                        </CenterPanel>
+                        <RightPanel>
+                            <h2>Your Silhouette</h2>
+                            <ScoreChart userScores={userScores} cohortScores={cohortScores} />
+                        </RightPanel>
+                    </MainContainer>
+                );
+            default:
+                return <LoginPage onLogin={handleLogin} onSwitchToRegister={() => setView('register')} />;
+        }
     };
 
     return (
         <>
-            <Modal show={!!newUserInfo} onHide={closeKeyModal} backdrop="static" keyboard={false}>
-                <Modal.Header><Modal.Title>Registration Successful!</Modal.Title></Modal.Header>
-                <Modal.Body>
-                    <Alert variant="success">Please proceed to the login page to sign in with your new identity.</Alert>
+            <Modal show={!!newUserInfo} onHide={closeKeyModal} centered>
+                <Modal.Header style={{ backgroundColor: '#2d2d2d', color: '#c5b358', borderBottom: '1px solid #4b3832' }}>
+                    <Modal.Title>Registration Successful!</Modal.Title>
+                </Modal.Header>
+                <Modal.Body style={{ backgroundColor: '#352a25', color: '#e8e4d5' }}>
+                    <Alert variant="success">Your new identity has been created. Please proceed to the login page to sign in.</Alert>
                     <Form.Group className="mb-3">
-                        <Form.Label>Your Public Key</Form.Label>
-                        <Form.Control as="textarea" rows={4} value={newUserInfo?.public_key} readOnly />
+                        <Form.Label>Your Public Key (Saved to Local Storage)</Form.Label>
+                        <Form.Control as="textarea" rows={4} value={newUserInfo?.public_key} readOnly 
+                            style={{ backgroundColor: '#f5f5dc', color: '#3d3d3d' }}/>
                     </Form.Group>
                 </Modal.Body>
-                <Modal.Footer><Button variant="primary" onClick={closeKeyModal}>Go to Login</Button></Modal.Footer>
+                <Modal.Footer style={{ backgroundColor: '#2d2d2d', borderTop: '1px solid #4b3832' }}>
+                    <StyledButton onClick={closeKeyModal}>Go to Login</StyledButton>
+                </Modal.Footer>
             </Modal>
-
-            <Navbar expand="lg" className="mb-4">
-                <Container>
-                    <Navbar.Brand href="#">Silhouet</Navbar.Brand>
-                    <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                    <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
-                        <Nav><Button variant="outline-light" onClick={handleLogout}>Logout</Button></Nav>
-                    </Navbar.Collapse>
-                </Container>
-            </Navbar>
-            <Container fluid>
-                <Row className="filter-bar">
-                    {/* Filter Controls */}
-                    {Object.keys(filters).map(key => (
-                        <Col md={2} key={key} className="mb-2">
-                            <Form.Group>
-                                <Form.Label>{key.replace(/_/g, ' ')}</Form.Label>
-                                <Form.Control type={key.includes('age') ? 'number' : 'text'} name={key} value={filters[key]} onChange={handleFilterChange} />
-                            </Form.Group>
-                        </Col>
-                    ))}
-                    <Col md={12} className="d-flex justify-content-end mt-2"><Button onClick={handleApplyFilters}>Apply Filters</Button></Col>
-                </Row>
-                <Row>
-                    <Col md={4} className="journal-section">
-                        <h2>Journal</h2>
-                        <Form.Control as="textarea" rows={10} value={journalText} onChange={(e) => setJournalText(e.target.value)} placeholder="Write your thoughts here..." />
-                        <Button className="mt-2 w-100" onClick={handleJournalSubmit}>Submit</Button>
-                    </Col>
-                    <Col md={8} className="scores-section">
-                        <h2>Personality Scores</h2>
-                        <div className="chart-container"><Bar data={chartData} options={chartOptions as any} /></div>
-                    </Col>
-                </Row>
-            </Container>
+            {renderView()}
         </>
     );
 }
