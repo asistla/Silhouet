@@ -1,8 +1,8 @@
 # silhouet/cron/Dockerfile
 FROM alpine:3.18
 
-# Ensure package lists are updated and install cronie and postgresql-client
-RUN apk update && apk add --no-cache cronie postgresql-client
+# Ensure package lists are updated and install cronie, postgresql-client, and docker-cli
+RUN apk update && apk add --no-cache cronie postgresql-client docker-cli
 
 # Create the /etc/crontabs directory if it doesn't exist and set correct permissions
 # The cron daemon requires /etc/crontabs to be 0700 and files within it to be 0600

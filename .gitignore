@@ -39,6 +39,9 @@ coverage.xml
 .project
 .pydevproject
 
+# secret key
+.secret_key
+
 # Rope
 .ropeproject
 
@@ -51,3 +54,7 @@ docs/_build/
 
 #node modules
 frontend/node_modules/
+
+#misc
+*.swp
+backend/rotating_keys.json
