@@ -1,25 +1,21 @@
-import React from 'react';
+// src/index.tsx
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
-
 import { ThemeProvider } from 'styled-components';
-import { theme } from './theme';
+import { darkTheme, lightTheme } from './theme';
 import { GlobalStyle } from './GlobalStyle';
+import App from './App';
 
-root.render(
-  <ThemeProvider theme={theme}>
-    <GlobalStyle />
-    <App />
-  </ThemeProvider>
-);
+const Root = () => {
+  const [isDark, setIsDark] = useState(true);
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+  return (
+    <ThemeProvider theme={isDark ? darkTheme : lightTheme}>
+      <GlobalStyle />
+      <App toggleTheme={() => setIsDark(prev => !prev)} isDark={isDark} />
+    </ThemeProvider>
+  );
+};
+
+const root = ReactDOM.createRoot(document.getElementById('root')!);
+root.render(<Root />);

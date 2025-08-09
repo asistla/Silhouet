@@ -27,7 +27,7 @@ interface NewUserInfo { user_id: string; public_key: string; created_at: string;
 
 type AppView = 'login' | 'register' | 'dashboard';
 
-function App() {
+function App({ toggleTheme, isDark }: { toggleTheme: () => void; isDark: boolean }) {
     const [auth, setAuth] = useState<AuthData | null>(null);
     const [view, setView] = useState<AppView>('login');
     const [newUserInfo, setNewUserInfo] = useState<NewUserInfo | null>(null);
@@ -186,6 +186,11 @@ function App() {
             case 'dashboard':
                 return (
                     <MainContainer>
+                        <StyledButton 
+                          onClick={toggleTheme} 
+                          style={{ position: 'absolute', top: '2rem', left: '2rem', zIndex: 10 }}>
+                            {isDark ? 'Light Mode' : 'Dark Mode'}
+                        </StyledButton>
                         <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
                         <LeftPanel>
                             <div className="logo-container"><Logo className="logo-svg" /></div>
