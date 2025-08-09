@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Form, Modal, Alert } from 'react-bootstrap';
+import { Modal, Alert } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
@@ -11,13 +11,14 @@ import { ReactComponent as Logo } from './logo.svg';
 import LoginPage from './LoginPage';
 import RegistrationPage from './RegistrationPage';
 import ScoreChart from './components/ScoreChart';
-import { MainContainer, LeftPanel, CenterPanel, RightPanel, TextArea, StyledButton } from './components/StyledComponents';
+import { MainContainer, LeftPanel, CenterPanel, RightPanel, TextArea, StyledButton, LogoutButton } from './components/StyledComponents';
+import { FilterPanel } from './components/ui/FilterPanel';
+import { AdSlot } from './components/ui/AdSlot';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || '';
 const API_URL = `${API_BASE_URL}/api`;
 const LOGOUT_DELAY = parseInt(process.env.REACT_APP_AUTO_LOGOUT_DELAY || '600000', 10);
 
-// --- Type Definitions ---
 interface Scores { [key: string]: number; }
 interface Filters { [key: string]: string; }
 interface User { user_id: string; public_key: string; }
@@ -40,9 +41,7 @@ function App() {
     const filterCountries = useMemo(() => Country.getAllCountries(), []);
     const filterStates = useMemo(() => selectedFilterCountry ? State.getStatesOfCountry(selectedFilterCountry.isoCode) : [], [selectedFilterCountry]);
 
-    const getAuthHeaders = useCallback(() => {
-        return auth ? { 'Authorization': `Bearer ${auth.token}` } : {};
-    }, [auth]);
+    const getAuthHeaders = useCallback(() => auth ? { 'Authorization': `Bearer ${auth.token}` } : {}, [auth]);
 
     const handleLogout = useCallback(() => {
         localStorage.removeItem('auth');
@@ -60,14 +59,10 @@ function App() {
         if (!auth) return;
         try {
             const headers = getAuthHeaders();
-            const response = await fetch(`${API_URL}/scores/me`, { 
-                headers: headers.Authorization ? headers : undefined 
-            });
+            const response = await fetch(`${API_URL}/scores/me`, { headers: headers.Authorization ? headers : undefined });
             if (response.ok) setUserScores(await response.json());
             else setUserScores(PERSONALITY_KEYS.reduce((acc, key) => ({ ...acc, [`avg_${key}_score`]: 0 }), {}));
-        } catch (error) { 
-            console.error("Failed to fetch user scores:", error); 
-        }
+        } catch (error) { console.error("Failed to fetch user scores:", error); }
     }, [auth, getAuthHeaders]);
 
     useEffect(() => {
@@ -97,18 +92,14 @@ function App() {
         }
     }, [handleLogout]);
 
-    useEffect(() => {
-        if (auth) {
-            fetchUserScores();
-        }
-    }, [auth, fetchUserScores]);
+    useEffect(() => { if (auth) fetchUserScores(); }, [auth, fetchUserScores]);
 
     const handleLogin = async (publicKey: string, signature: string): Promise<boolean> => {
         try {
             const response = await fetch(`${API_URL}/users/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ public_key: publicKey, signature: signature })
+                body: JSON.stringify({ public_key: publicKey, signature })
             });
             if (response.ok) {
                 const data = await response.json();
@@ -133,11 +124,10 @@ function App() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(registrationData)
             });
-    
             if (regResponse.ok) {
                 const newUser: NewUserInfo = await regResponse.json();
-                setNewUserInfo(newUser); // Show the success modal
-                setView('login');      // Ensure the background is the login page
+                setNewUserInfo(newUser);
+                setView('login');
             } else {
                 const errorData = await regResponse.json();
                 alert(`Registration failed: ${errorData.detail || 'Please try again.'}`);
@@ -150,19 +140,9 @@ function App() {
 
     const handleJournalSubmit = async () => {
         if (!auth || !journalText) return;
-        
         const authHeaders = getAuthHeaders();
-        const headers = {
-            'Content-Type': 'application/json',
-            ...(authHeaders.Authorization && { Authorization: authHeaders.Authorization })
-        };
-        
-        const response = await fetch(`${API_URL}/posts/`, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({ raw_text: journalText })
-        });
-        
+        const headers = { 'Content-Type': 'application/json', ...(authHeaders.Authorization && { Authorization: authHeaders.Authorization }) };
+        const response = await fetch(`${API_URL}/posts/`, { method: 'POST', headers, body: JSON.stringify({ raw_text: journalText }) });
         if (response.ok) {
             setJournalText('');
             setTimeout(fetchUserScores, 2000);
@@ -170,11 +150,10 @@ function App() {
             alert("Failed to submit journal entry.");
         }
     };
-    
+
     const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFilters(prev => ({ ...prev, [name]: value }));
-
         if (name === 'country') {
             const country = filterCountries.find(c => c.isoCode === value);
             setSelectedFilterCountry(country || null);
@@ -196,9 +175,7 @@ function App() {
         }
     };
 
-    const closeKeyModal = () => {
-        setNewUserInfo(null);
-    }
+    const closeKeyModal = () => setNewUserInfo(null);
 
     const renderView = () => {
         switch (view) {
@@ -209,36 +186,16 @@ function App() {
             case 'dashboard':
                 return (
                     <MainContainer>
-                        <StyledButton onClick={handleLogout} style={{ position: 'absolute', top: '2rem', right: '2rem', zIndex: 10 }}>
-                            Logout
-                        </StyledButton>
+                        <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
                         <LeftPanel>
-                            <div className="logo-container">
-                                <Logo className="logo-svg" />
-                            </div>
-                            <h2>Filters</h2>
-                            <Form>
-                                {Object.keys(filters).map(key => (
-                                    <Form.Group key={key} className="filter-group">
-                                        <Form.Label>{key.replace(/_/g, ' ')}</Form.Label>
-                                        <Form.Control type={key.includes('age') ? 'number' : 'text'} name={key} value={filters[key]} onChange={handleFilterChange} size="sm" />
-                                    </Form.Group>
-                                ))}
-                            </Form>
-                            <StyledButton onClick={handleApplyFilters} style={{ width: '100%', marginTop: 'auto' }}>
-                                Apply Filters
-                            </StyledButton>
+                            <div className="logo-container"><Logo className="logo-svg" /></div>
+                            <FilterPanel filters={filters} onChange={handleFilterChange} onApply={handleApplyFilters} />
                         </LeftPanel>
                         <CenterPanel>
                             <h2>Journal</h2>
-                            <TextArea 
-                                value={journalText} 
-                                onChange={(e: any) => setJournalText(e.target.value)} 
-                                placeholder="The page is yours..." 
-                            />
-                            <StyledButton onClick={handleJournalSubmit} style={{ marginTop: '1rem', width: '100%' }}>
-                                Submit
-                            </StyledButton>
+                            <TextArea value={journalText} onChange={(e: any) => setJournalText(e.target.value)} placeholder="The page is yours..." />
+                            <StyledButton onClick={handleJournalSubmit} style={{ marginTop: '1rem', width: '100%' }}>Submit</StyledButton>
+                            <AdSlot position="journal_footer" />
                         </CenterPanel>
                         <RightPanel>
                             <h2>Your Silhouette</h2>
@@ -254,18 +211,15 @@ function App() {
     return (
         <>
             <Modal show={!!newUserInfo} onHide={closeKeyModal} centered>
-                <Modal.Header style={{ backgroundColor: '#2d2d2d', color: '#c5b358', borderBottom: '1px solid #4b3832' }}>
+                <Modal.Header>
                     <Modal.Title>Registration Successful!</Modal.Title>
                 </Modal.Header>
-                <Modal.Body style={{ backgroundColor: '#352a25', color: '#e8e4d5' }}>
+                <Modal.Body>
                     <Alert variant="success">Your new identity has been created. Please proceed to the login page to sign in.</Alert>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Your Public Key (Saved to Local Storage)</Form.Label>
-                        <Form.Control as="textarea" rows={4} value={newUserInfo?.public_key} readOnly 
-                            style={{ backgroundColor: '#f5f5dc', color: '#3d3d3d' }}/>
-                    </Form.Group>
+                    <p>Your Public Key (Saved to Local Storage)</p>
+                    <textarea rows={4} value={newUserInfo?.public_key} readOnly />
                 </Modal.Body>
-                <Modal.Footer style={{ backgroundColor: '#2d2d2d', borderTop: '1px solid #4b3832' }}>
+                <Modal.Footer>
                     <StyledButton onClick={closeKeyModal}>Go to Login</StyledButton>
                 </Modal.Footer>
             </Modal>

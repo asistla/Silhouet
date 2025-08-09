@@ -1,113 +1,103 @@
+import styled from 'styled-components';
 
-import React from 'react';
+// Main layout container
+export const MainContainer = styled.div`
+  display: flex;
+  height: 100vh;
+  background-color: ${({ theme }) => theme.colors.background};
+  color: ${({ theme }) => theme.colors.text};
+  font-family: ${({ theme }) => theme.font.family};
+`;
 
-export const MainContainer: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <div style={{
-        display: 'flex',
-        height: '100vh',
-        backgroundColor: '#2d2d2d',
-        color: '#e8e4d5',
-        fontFamily: 'Georgia, serif',
-    }}>
-        {children}
-    </div>
-);
+// Left panel
+export const LeftPanel = styled.div`
+  width: 20%;
+  padding: ${({ theme }) => theme.spacing(2)};
+  border-right: 1px solid ${({ theme }) => theme.colors.accent};
+  box-shadow: 5px 0 15px -5px rgba(0, 0, 0, 0.5);
+  overflow-y: auto;
+`;
 
-export const LeftPanel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <div style={{
-        width: '20%', // Adjusted for better usability
-        padding: '2rem',
-        borderRight: '1px solid #4b3832',
-        boxShadow: '5px 0 15px -5px rgba(0,0,0,0.5)',
-        overflowY: 'auto'
-    }}>
-        {children}
-    </div>
-);
+// Center panel
+export const CenterPanel = styled.div`
+  width: 50%;
+  padding: ${({ theme }) => theme.spacing(2)};
+  display: flex;
+  flex-direction: column;
+`;
 
-export const CenterPanel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <div style={{
-        width: '50%', // Adjusted
-        padding: '2rem',
-        display: 'flex',
-        flexDirection: 'column',
-    }}>
-        {children}
-    </div>
-);
+// Right panel
+export const RightPanel = styled.div`
+  width: 30%;
+  padding: ${({ theme }) => theme.spacing(2)};
+  border-left: 1px solid ${({ theme }) => theme.colors.accent};
+  background-color: ${({ theme }) => theme.colors.panel};
+  overflow-y: auto;
+`;
 
-export const RightPanel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <div style={{
-        width: '30%',
-        padding: '2rem',
-        borderLeft: '1px solid #4b3832',
-        backgroundColor: '#352a25', // Slightly different shade for depth
-        overflowY: 'auto'
-    }}>
-        {children}
-    </div>
-);
+// Journal textarea
+export const TextArea = styled.textarea`
+  flex-grow: 1;
+  width: 100%;
+  background-color: ${({ theme }) => theme.colors.background};
+  color: ${({ theme }) => theme.colors.text};
+  border: 1px solid ${({ theme }) => theme.colors.accent};
+  border-radius: 4px;
+  padding: ${({ theme }) => theme.spacing(2)};
+  font-family: ${({ theme }) => theme.font.family};
+  font-size: 1.1rem;
+  line-height: 1.7;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+  resize: none;
+  outline: none;
+`;
 
-export const TextArea: React.FC<any> = (props) => (
-    <textarea {...props} style={{
-        flexGrow: 1,
-        width: '100%',
-        backgroundColor: '#f5f5dc',
-        color: '#3d3d3d',
-        border: '1px solid #c5b358',
-        borderRadius: '4px',
-        padding: '1rem',
-        fontFamily: 'Georgia, serif',
-        fontSize: '1.1rem',
-        lineHeight: 1.7,
-        boxShadow: 'inset 0 0 10px rgba(0,0,0,0.2)',
-        resize: 'none',
-        outline: 'none'
-    }} />
-);
+// Generic styled button
+export const StyledButton = styled.button`
+  background-color: ${({ theme }) => theme.colors.buttonBg};
+  color: ${({ theme }) => theme.colors.buttonText};
+  border: none;
+  padding: ${({ theme }) => `${theme.spacing(1)} ${theme.spacing(2)}`};
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: ${({ theme }) => theme.font.family};
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.3s ease;
 
-export const StyledButton: React.FC<any> = (props) => (
-    <button {...props} style={{
-        backgroundColor: '#b87333',
-        color: '#f5f5dc',
-        border: 'none',
-        padding: '8px 16px',
-        borderRadius: '4px',
-        cursor: 'pointer',
-        fontFamily: 'Garamond, serif',
-        fontSize: '0.9rem',
-        textTransform: 'uppercase',
-        letterSpacing: '1px',
-        boxShadow: '0 2px 5px rgba(0,0,0,0.3)',
-        transition: 'background-color 0.3s ease',
-        ...props.style
-    }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#c5b358'}
-       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#b87333'}
-    />
-);
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.accent};
+  }
+`;
 
-export const AuthContainer: React.FC<{ children: React.ReactNode, style?: React.CSSProperties }> = ({ children, style }) => (
-    <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        backgroundColor: '#2d2d2d',
-        padding: '2rem',
-        fontFamily: 'Georgia, serif',
-    }}>
-        <div style={{
-            width: '100%',
-            maxWidth: '40rem',
-            padding: '3rem',
-            backgroundColor: '#352a25',
-            borderRadius: '8px',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-            border: '1px solid #4b3832',
-            color: '#e8e4d5',
-            ...style
-        }}>
-            {children}
-        </div>
-    </div>
-);
+// Auth container for login/register pages
+export const AuthContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: ${({ theme }) => theme.colors.background};
+  padding: ${({ theme }) => theme.spacing(2)};
+  font-family: ${({ theme }) => theme.font.family};
+
+  > div {
+    width: 100%;
+    max-width: 40rem;
+    padding: ${({ theme }) => theme.spacing(3)};
+    background-color: ${({ theme }) => theme.colors.panel};
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 1px solid ${({ theme }) => theme.colors.accent};
+    color: ${({ theme }) => theme.colors.text};
+  }
+`;
+
+// Logout button reusing StyledButton
+export const LogoutButton = styled(StyledButton)`
+  position: absolute;
+  top: ${({ theme }) => theme.spacing(2)};
+  right: ${({ theme }) => theme.spacing(2)};
+  z-index: 10;
+`;
