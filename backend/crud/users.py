@@ -1,7 +1,7 @@
 # backend/crud/users.py
 from sqlalchemy.orm import Session
-from models import User
-from schemas import UserCreate, UserCreateResponse
+from models import User, AdvertiserProfile
+from schemas import UserCreate, UserCreateResponse, AdvertiserCreate, AdvertiserCreateResponse, AdvertiserProfileResponse
 import uuid
 from datetime import datetime, timezone
 from silhouet_config import PERSONALITY_KEYS
@@ -14,40 +14,78 @@ import redis.asyncio as redis
 def get_user_by_public_key(db: Session, public_key: str):
     return db.query(User).filter(User.public_key == public_key).first()
 
-def create_user(db: Session, user_data: UserCreate) -> UserCreateResponse:
+def create_user(db: Session, user_data: UserCreate, role: str = 'user') -> User:
     """
-    Creates a new user record in the database with a client-provided public key.
+    Creates a new user record in the database. Can specify a role.
+    Returns the full User ORM object.
     """
     try:
         db_user_data = user_data.model_dump()
-        db_user_data.update({
+        # Remove any fields from the input that aren't in the User model
+        # This is important for the AdvertiserCreate schema which has extra fields
+        user_fields = {c.name for c in User.__table__.columns}
+        filtered_user_data = {k: v for k, v in db_user_data.items() if k in user_fields}
+
+        filtered_user_data.update({
             "user_id": uuid.uuid4(),
+            "role": role,
             "total_posts_count": 0,
             "created_at": datetime.now(timezone.utc),
             "updated_at": datetime.now(timezone.utc)
         })
 
-        # Initialize all personality average scores to 0.5
         for key in PERSONALITY_KEYS:
-            db_user_data[f"avg_{key}_score"] = 0.5
+            filtered_user_data[f"avg_{key}_score"] = 0.5
 
-        new_user = User(**db_user_data)
+        new_user = User(**filtered_user_data)
         db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-
-        return UserCreateResponse(
-            user_id=new_user.user_id,
-            public_key=new_user.public_key,
-            created_at=new_user.created_at
-        )
-    except IntegrityError:
-        db.rollback()
-        # This likely means the public key already exists.
-        return None
+        # We might not commit right away if part of a larger transaction
+        return new_user
     except Exception as e:
         db.rollback()
         raise e
+
+def create_advertiser(db: Session, advertiser_data: AdvertiserCreate) -> AdvertiserCreateResponse:
+    """
+    Creates an advertiser, which includes a User record and an AdvertiserProfile record.
+    This is a transactional operation.
+    """
+    # Check if public key already exists to provide a clearer error
+    if get_user_by_public_key(db, public_key=advertiser_data.public_key):
+        raise IntegrityError("Public key already registered.", params=None, orig=None)
+
+    try:
+        # Create the base user with the 'advertiser' role
+        new_user = create_user(db, advertiser_data, role='advertiser')
+        
+        # Create the advertiser profile
+        new_profile = AdvertiserProfile(
+            user_id=new_user.user_id,
+            company_name=advertiser_data.company_name
+        )
+        db.add(new_profile)
+        
+        db.commit()
+        db.refresh(new_user)
+        db.refresh(new_profile)
+
+        return AdvertiserCreateResponse(
+            user=UserCreateResponse(
+                user_id=new_user.user_id,
+                public_key=new_user.public_key,
+                role=new_user.role,
+                created_at=new_user.created_at
+            ),
+            profile=AdvertiserProfileResponse(
+                id=new_profile.id,
+                company_name=new_profile.company_name,
+                created_at=new_profile.created_at
+            )
+        )
+    except Exception as e:
+        db.rollback()
+        raise e
+
 
 async def authenticate_user_challenge(db: Session, redis_client: redis.Redis, public_key: str, signature: str) -> User:
     """
@@ -58,32 +96,23 @@ async def authenticate_user_challenge(db: Session, redis_client: redis.Redis, pu
     if not db_user:
         return None
     try:
-        # 1. Retrieve the challenge from Redis
         challenge_key = f"challenge:{public_key}"
         challenge = await redis_client.get(challenge_key)
         if not challenge:
-            return None # Challenge expired or was never set
+            return None
         
-        # 2. Decode the public key from Base64
         verify_key = VerifyKey(public_key.encode('utf-8'), encoder=Base64Encoder)
-        
-        # 3. Verify the signature
-        # The challenge from Redis might be bytes, so decode it if needed  
         challenge_str = challenge.decode('utf-8') if isinstance(challenge, bytes) else challenge
         
-        # Manual base64 decoding works correctly
         import base64
         signature_bytes = base64.b64decode(signature)
         verify_key.verify(challenge_str.encode('utf-8'), signature_bytes)
         
-        # 4. On successful verification, delete the challenge to prevent reuse
         await redis_client.delete(challenge_key)
         return db_user
     except BadSignatureError:
-        # Signature was invalid
         return None
     except Exception as e:
-        # Handle other potential errors (e.g., decoding errors)
         print(f"An unexpected error occurred during authentication: {e}")
         return None
 

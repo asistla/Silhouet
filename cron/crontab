@@ -1,6 +1,9 @@
 # silhouet/cron/crontab
 # m h dom mon dow command
 
+# Run campaign and insight processing every 5 minutes
+*/5 * * * * python /app/cron/run_campaign_processing.py >> /var/log/cron.log 2>&1
+
 # Daily cleanup job
 0 0 * * * /usr/local/bin/cleanup_job.sh >> /var/log/cron.log 2>&1
 
