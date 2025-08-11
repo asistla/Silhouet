@@ -4,11 +4,31 @@
 # Run campaign and insight processing every 5 minutes
 */5 * * * * python /app/cron/run_campaign_processing.py >> /var/log/cron.log 2>&1
 
+# --- Geo-Score Aggregation ---
+# Note: These jobs execute a python script within the 'backend' container.
+
+# Every hour: Update zipcode scores from user data
+0 * * * * docker exec silhouet-backend python /app/aggregate_scores.py pincode >> /var/log/cron.log 2>&1
+
+# Every 2 hours: Update city scores from zipcode scores
+0 */2 * * * docker exec silhouet-backend python /app/aggregate_scores.py city >> /var/log/cron.log 2>&1
+
+# Every 4 hours: Update district scores from city scores
+0 */4 * * * docker exec silhouet-backend python /app/aggregate_scores.py district >> /var/log/cron.log 2>&1
+
+# Every 8 hours: Update state scores from district scores
+0 */8 * * * docker exec silhouet-backend python /app/aggregate_scores.py state >> /var/log/cron.log 2>&1
+
+# Every 12 hours: Update country scores from state scores
+0 */12 * * * docker exec silhouet-backend python /app/aggregate_scores.py country >> /var/log/cron.log 2>&1
+
+# Every 24 hours (at midnight): Update global score from country scores
+0 0 * * * docker exec silhouet-backend python /app/aggregate_scores.py global >> /var/log/cron.log 2>&1
+
+
+# --- Maintenance Jobs ---
 # Daily cleanup job
-0 0 * * * /usr/local/bin/cleanup_job.sh >> /var/log/cron.log 2>&1
+15 0 * * * /usr/local/bin/cleanup_job.sh >> /var/log/cron.log 2>&1
 
 # Daily secret key rotation
-0 0 * * * docker exec silhouet-backend python /app/keymanager.py rotate >> /var/log/cron.log 2>&1
-
-# This schedules cleanup_job.sh to run daily at midnight UTC.
-# Output is logged to /var/log/cron.log within the container.
+30 0 * * * docker exec silhouet-backend python /app/keymanager.py rotate >> /var/log/cron.log 2>&1

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Alert } from 'react-bootstrap';
+import styled from 'styled-components';
 import { decryptPrivateKey, signMessage } from './crypto';
-import { AuthContainer } from './components/StyledComponents';
-import { StyledButton } from './components/StyledComponents';
+import { AuthContainer, StyledButton } from './components/StyledComponents';
 
 interface LoginPageProps {
     onLogin: (publicKey: string, signature: string) => Promise<boolean>;
@@ -12,29 +12,65 @@ interface LoginPageProps {
 const API_BASE_URL = process.env.REACT_APP_API_URL || '';
 const API_URL = `${API_BASE_URL}/api`;
 
-const inputStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '10px',
-    marginBottom: '1rem',
-    backgroundColor: '#f5f5dc',
-    color: '#3d3d3d',
-    border: '1px solid #c5b358',
-    borderRadius: '4px',
-    fontFamily: 'Georgia, serif',
-};
+const FormGroup = styled.div`
+  margin-bottom: 1.5rem;
+`;
 
-const linkStyle: React.CSSProperties = {
-    background: 'none',
-    border: 'none',
-    color: '#c5b358',
-    textDecoration: 'underline',
-    cursor: 'pointer',
-    padding: '0',
-    marginTop: '1rem',
-    display: 'block',
-    width: '100%',
-    textAlign: 'center'
-};
+const Label = styled.label`
+  display: block;
+  margin-bottom: ${({ theme }) => theme.spacing(1)};
+  font-family: ${({ theme }) => theme.font.familySerif};
+  color: ${({ theme }) => theme.colors.accent};
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 12px;
+  background-color: ${({ theme }) => theme.colors.paper};
+  color: ${({ theme }) => theme.colors.textOnPaper};
+  border: 1px solid ${({ theme }) => theme.colors.accent};
+  border-radius: 4px;
+  font-family: ${({ theme }) => theme.font.family};
+  &:focus {
+    border-color: ${({ theme }) => theme.colors.accent2};
+    box-shadow: 0 0 5px ${({ theme }) => theme.colors.accent};
+    outline: none;
+  }
+`;
+
+const Textarea = styled.textarea`
+  width: 100%;
+  padding: 12px;
+  min-height: 80px;
+  resize: vertical;
+  background-color: ${({ theme }) => theme.colors.paper};
+  color: ${({ theme }) => theme.colors.textOnPaper};
+  border: 1px solid ${({ theme }) => theme.colors.accent};
+  border-radius: 4px;
+  font-family: ${({ theme }) => theme.font.family};
+  &:focus {
+    border-color: ${({ theme }) => theme.colors.accent2};
+    box-shadow: 0 0 5px ${({ theme }) => theme.colors.accent};
+    outline: none;
+  }
+`;
+
+const LinkButton = styled.button`
+  background: none;
+  border: none;
+  color: ${({ theme }) => theme.colors.accent};
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 1rem;
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-family: ${({ theme }) => theme.font.familySerif};
+`;
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToRegister }) => {
     const [publicKey, setPublicKey] = useState('');
@@ -96,51 +132,79 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToRegister }) =>
 
     return (
         <AuthContainer>
-            <h2 style={{ textAlign: 'center', fontFamily: 'Garamond, serif', color: '#c5b358', marginBottom: '2rem' }}>
-                Enter the Study
-            </h2>
-            
-            {error && <Alert variant="danger">{error}</Alert>}
-            
-            <form onSubmit={handleLoginSubmit}>
-                <label style={{ marginBottom: '0.5rem', display: 'block' }}>Public Key</label>
-                <textarea
-                    style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }}
-                    placeholder="Your public key"
-                    value={publicKey}
-                    onChange={(e) => setPublicKey(e.target.value)}
-                    required
-                    disabled={isLoading}
-                />
+            <div>
+                <h2 style={{ textAlign: 'center', fontFamily: 'Garamond, serif', color: '#c5b358', marginBottom: '2rem' }}>
+                    Enter the Study
+                </h2>
+                
+                {error && <Alert variant="danger">{error}</Alert>}
+                
+                <form onSubmit={handleLoginSubmit}>
+                    <FormGroup>
+                        <Label>Public Key</Label>
+                        <Textarea
+                            placeholder="Your public key"
+                            value={publicKey}
+                            onChange={(e) => setPublicKey(e.target.value)}
+                            required
+                            disabled={isLoading}
+                        />
+                    </FormGroup>
 
-                <label style={{ marginBottom: '0.5rem', display: 'block' }}>Passphrase</label>
-                <input
-                    type="password"
-                    style={inputStyle}
-                    placeholder="Your passphrase"
-                    value={passphrase}
-                    onChange={(e) => setPassphrase(e.target.value)}
-                    required
-                    disabled={isLoading}
-                />
+                    <FormGroup>
+                        <Label>Passphrase</Label>
+                        <Input
+                            type="password"
+                            placeholder="Your passphrase"
+                            value={passphrase}
+                            onChange={(e) => setPassphrase(e.target.value)}
+                            required
+                            disabled={isLoading}
+                        />
+                    </FormGroup>
 
-                {isLoading ? (
-                    <div style={{ textAlign: 'center' }}>
-                        <p>Authenticating...</p>
-                    </div>
-                ) : (
-                    <>
-                        <StyledButton type="submit" style={{ width: '100%' }}>
-                            Login
-                        </StyledButton>
-                        <button type="button" onClick={onSwitchToRegister} style={linkStyle}>
-                            New user? Create an identity
-                        </button>
-                    </>
-                )}
-            </form>
+                    {isLoading ? (
+                        <div style={{ textAlign: 'center' }}>
+                            <p>Authenticating...</p>
+                        </div>
+                    ) : (
+                        <>
+                            <StyledButton type="submit" style={{ width: '100%' }}>
+                                Login
+                            </StyledButton>
+                            <LinkButton type="button" onClick={onSwitchToRegister}>
+                                New user? Create an identity
+                            </LinkButton>
+                        </>
+                    )}
+                </form>
+            </div>
         </AuthContainer>
     );
+};
+
+const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '10px',
+    marginBottom: '1rem',
+    backgroundColor: '#f5f5dc',
+    color: '#3d3d3d',
+    border: '1px solid #c5b358',
+    borderRadius: '4px',
+    fontFamily: 'Georgia, serif',
+};
+
+const linkStyle: React.CSSProperties = {
+    background: 'none',
+    border: 'none',
+    color: '#c5b358',
+    textDecoration: 'underline',
+    cursor: 'pointer',
+    padding: '0',
+    marginTop: '1rem',
+    display: 'block',
+    width: '100%',
+    textAlign: 'center'
 };
 
 export default LoginPage;
