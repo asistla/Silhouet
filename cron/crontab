@@ -7,5 +7,8 @@
 # Daily secret key rotation
 0 0 * * * docker exec silhouet-backend python /app/keymanager.py rotate >> /var/log/cron.log 2>&1
 
+# Daily secret key rotation
+0 0 * * * docker exec silhouet-backend python /app/keymanager.py rotate >> /var/log/cron.log 2>&1
+
 # This schedules cleanup_job.sh to run daily at midnight UTC.
 # Output is logged to /var/log/cron.log within the container.
