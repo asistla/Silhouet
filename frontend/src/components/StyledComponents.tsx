@@ -11,36 +11,40 @@ export const MainContainer = styled.div`
 
 // Left panel
 export const LeftPanel = styled.div`
-  width: 20%;
-  padding: ${({ theme }) => theme.spacing(2)};
-  border-right: 1px solid ${({ theme }) => theme.colors.accent};
+  flex: 0 0 280px; /* Fixed width */
+  padding: ${({ theme }) => theme.spacing(3)};
+  border-right: 1px solid ${({ theme }) => theme.colors.borderColor};
   box-shadow: 5px 0 15px -5px rgba(0, 0, 0, 0.5);
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 `;
 
 // Center panel
 export const CenterPanel = styled.div`
-  width: 50%;
-  padding: ${({ theme }) => theme.spacing(2)};
+  flex: 1 1 60%; /* Flexible width */
+  padding: ${({ theme }) => theme.spacing(3)};
   display: flex;
   flex-direction: column;
 `;
 
 // Right panel
 export const RightPanel = styled.div`
-  width: 30%;
-  padding: ${({ theme }) => theme.spacing(2)};
-  border-left: 1px solid ${({ theme }) => theme.colors.accent};
+  flex: 1 1 40%; /* Flexible width */
+  padding: ${({ theme }) => theme.spacing(3)};
+  border-left: 1px solid ${({ theme }) => theme.colors.borderColor};
   background-color: ${({ theme }) => theme.colors.panel};
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 `;
 
 // Journal textarea
 export const TextArea = styled.textarea`
   flex-grow: 1;
   width: 100%;
-  background-color: ${({ theme }) => theme.colors.background};
-  color: ${({ theme }) => theme.colors.text};
+  background-color: ${({ theme }) => theme.colors.paper};
+  color: ${({ theme }) => theme.colors.textOnPaper};
   border: 1px solid ${({ theme }) => theme.colors.accent};
   border-radius: 4px;
   padding: ${({ theme }) => theme.spacing(2)};
@@ -57,39 +61,43 @@ export const StyledButton = styled.button`
   background-color: ${({ theme }) => theme.colors.buttonBg};
   color: ${({ theme }) => theme.colors.buttonText};
   border: none;
-  padding: ${({ theme }) => `${theme.spacing(1)} ${theme.spacing(2)}`};
+  padding: ${({ theme }) => `${theme.spacing(1.5)} ${theme.spacing(3)}`};
   border-radius: 4px;
   cursor: pointer;
-  font-family: ${({ theme }) => theme.font.family};
-  font-size: 0.9rem;
+  font-family: ${({ theme }) => theme.font.familySerif};
+  font-size: 1rem;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
-    background-color: ${({ theme }) => theme.colors.accent};
+    background-color: ${({ theme }) => theme.colors.accent2};
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    transform: translateY(-2px);
   }
 `;
 
 // Auth container for login/register pages
 export const AuthContainer = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background-color: ${({ theme }) => theme.colors.background};
   padding: ${({ theme }) => theme.spacing(2)};
-  font-family: ${({ theme }) => theme.font.family};
 
   > div {
     width: 100%;
-    max-width: 40rem;
-    padding: ${({ theme }) => theme.spacing(3)};
+    max-width: 45rem; /* Increased max-width */
+    padding: ${({ theme }) => theme.spacing(4)}; /* Increased padding */
     background-color: ${({ theme }) => theme.colors.panel};
     border-radius: 8px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    border: 1px solid ${({ theme }) => theme.colors.accent};
+    border: 1px solid ${({ theme }) => theme.colors.borderColor};
     color: ${({ theme }) => theme.colors.text};
   }
 `;
@@ -100,4 +108,16 @@ export const LogoutButton = styled(StyledButton)`
   top: ${({ theme }) => theme.spacing(2)};
   right: ${({ theme }) => theme.spacing(2)};
   z-index: 10;
+`;
+
+export const LogoContainer = styled.div`
+  text-align: center;
+  padding-bottom: 2rem;
+
+  .logo-svg {
+    width: 80%;
+    height: auto;
+    fill: ${({ theme }) => theme.colors.accent};
+    filter: drop-shadow(0 0 5px ${({ theme }) => theme.colors.accent2});
+  }
 `;

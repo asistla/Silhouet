@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Modal, Alert } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './App.css';
 
 import { Country, State } from 'country-state-city';
 import { ICountry } from 'country-state-city/lib/interface';
@@ -11,7 +10,7 @@ import { ReactComponent as Logo } from './logo.svg';
 import LoginPage from './LoginPage';
 import RegistrationPage from './RegistrationPage';
 import ScoreChart from './components/ScoreChart';
-import { MainContainer, LeftPanel, CenterPanel, RightPanel, TextArea, StyledButton, LogoutButton } from './components/StyledComponents';
+import { MainContainer, LeftPanel, CenterPanel, RightPanel, TextArea, StyledButton, LogoutButton, LogoContainer } from './components/StyledComponents';
 import { FilterPanel } from './components/ui/FilterPanel';
 import { AdSlot } from './components/ui/AdSlot';
 
@@ -193,7 +192,7 @@ function App({ toggleTheme, isDark }: { toggleTheme: () => void; isDark: boolean
                         </StyledButton>
                         <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
                         <LeftPanel>
-                            <div className="logo-container"><Logo className="logo-svg" /></div>
+                            <LogoContainer><Logo className="logo-svg" /></LogoContainer>
                             <FilterPanel filters={filters} onChange={handleFilterChange} onApply={handleApplyFilters} />
                         </LeftPanel>
                         <CenterPanel>

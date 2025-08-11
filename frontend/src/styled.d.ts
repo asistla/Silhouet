@@ -8,11 +8,16 @@ declare module 'styled-components' {
       panel: string;
       text: string;
       accent: string;
+      accent2: string;
       buttonBg: string;
       buttonText: string;
+      paper: string;
+      textOnPaper: string;
+      borderColor: string;
     };
     font: {
       family: string;
+      familySerif: string;
       size: string;
     };
     spacing: (factor: number) => string;
