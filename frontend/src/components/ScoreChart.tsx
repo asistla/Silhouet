@@ -41,13 +41,13 @@ const ScoreChart: React.FC<ScoreChartProps> = ({ userScores, cohortScores }) => 
         <ResponsiveContainer width="100%" height="100%">
             <BarChart 
                 data={chartData} 
-                layout="vertical" 
-                margin={{ top: 5, right: 100, left: 100, bottom: 5 }} // Increased margins for labels
+                layout="horizontal" 
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                 barCategoryGap="30%"
             >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e8e4d5" opacity={0.1} />
-                <XAxis type="number" domain={[-1, 1]} tick={{ fill: '#e8e4d5' }} />
-                <YAxis 
+                <YAxis type="number" domain={[-1, 1]} tick={{ fill: '#e8e4d5' }} />
+                <XAxis 
                     type="category" 
                     dataKey="subject" 
                     tickLine={false}

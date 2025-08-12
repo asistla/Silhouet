@@ -22,39 +22,70 @@ export const LeftPanel = styled.div`
 
 // Center panel
 export const CenterPanel = styled.div`
-  flex: 1 1 60%; /* Flexible width */
+  flex: 1 1 60%;
   padding: ${({ theme }) => theme.spacing(3)};
   display: flex;
   flex-direction: column;
+`;
+
+// New container for ScoreChart
+export const ScoreChartContainer = styled.div`
+  height: 250px;
+  margin-top: ${({ theme }) => theme.spacing(2)};
 `;
 
 // Right panel
 export const RightPanel = styled.div`
-  flex: 1 1 40%; /* Flexible width */
+  flex: 1 1 40%;
   padding: ${({ theme }) => theme.spacing(3)};
   border-left: 1px solid ${({ theme }) => theme.colors.borderColor};
   background-color: ${({ theme }) => theme.colors.panel};
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
+  gap: ${({ theme }) => theme.spacing(2)};
+  
+  /* Children split */
+  & > .ad-slot {
+    flex: 0 0 40%;
+  }
+
+  & > .insight-slot {
+    flex: 0 0 60%;
+  }
+`;
+
+//Journal Textarea
+export const TextArea = styled.textarea`
+  resize: none;
+  padding: ${({ theme }) => theme.spacing(2)};
+  font-size: 1rem;
+  line-height: 1.5;
+  border: 1px solid ${({ theme }) => theme.colors.borderColor};
+  border-radius: 8px;
+  background-color: ${({ theme }) => theme.colors.inputBackground};
+  color: ${({ theme }) => theme.colors.text};
+  outline: none;
+
+  /* Reduce height to ~75% of old */
+  height: 75%;
 `;
 
 // Journal textarea
-export const TextArea = styled.textarea`
-  flex-grow: 1;
-  width: 100%;
-  background-color: ${({ theme }) => theme.colors.paper};
-  color: ${({ theme }) => theme.colors.textOnPaper};
-  border: 1px solid ${({ theme }) => theme.colors.accent};
-  border-radius: 4px;
-  padding: ${({ theme }) => theme.spacing(2)};
-  font-family: ${({ theme }) => theme.font.family};
-  font-size: 1.1rem;
-  line-height: 1.7;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
-  resize: none;
-  outline: none;
-`;
+//export const TextArea = styled.textarea`
+//  flex-grow: 1;
+//  width: 100%;
+//  background-color: ${({ theme }) => theme.colors.paper};
+//  color: ${({ theme }) => theme.colors.textOnPaper};
+//  border: 1px solid ${({ theme }) => theme.colors.accent};
+//  border-radius: 4px;
+//  padding: ${({ theme }) => theme.spacing(2)};
+//  font-family: ${({ theme }) => theme.font.family};
+// font-size: 1.1rem;
+//  line-height: 1.7;
+//  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+//  resize: none;
+//  outline: none;
+//`;
 
 // Generic styled button
 export const StyledButton = styled.button`

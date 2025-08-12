@@ -9,25 +9,26 @@ import { PERSONALITY_KEYS } from './config';
 import { ReactComponent as Logo } from './logo.svg';
 import LoginPage from './LoginPage';
 import RegistrationPage from './RegistrationPage';
-import AdvertiserConsole from './AdvertiserConsole'; // Import AdvertiserConsole
 import ScoreChart from './components/ScoreChart';
 import { MainContainer, LeftPanel, CenterPanel, RightPanel, TextArea, StyledButton, LogoutButton, LogoContainer } from './components/StyledComponents';
 import { FilterPanel } from './components/ui/FilterPanel';
 import { AdSlot } from './components/ui/AdSlot';
-import { InsightSlot } from './components/ui/InsightSlot';
+
+import useServePolling from "./hooks/useServePolling";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || '';
 const API_URL = `${API_BASE_URL}/api`;
 const LOGOUT_DELAY = parseInt(process.env.REACT_APP_AUTO_LOGOUT_DELAY || '600000', 10);
 
+const { adMessage, insightMessage } = useServePolling(15000); //every 15 seconds
+ 
 interface Scores { [key: string]: number; }
 interface Filters { [key: string]: string; }
 interface User { user_id: string; public_key: string; }
-interface AuthData extends User { token: string; role: string; } // Add role to AuthData
+interface AuthData extends User { token: string; }
 interface NewUserInfo { user_id: string; public_key: string; created_at: string; }
-interface AdData { campaign_id: string; content: { text: string; link: string; }; }
 
-type AppView = 'login' | 'register' | 'dashboard' | 'advertiser_console'; // Add advertiser_console view
+type AppView = 'login' | 'register' | 'dashboard';
 
 function App({ toggleTheme, isDark }: { toggleTheme: () => void; isDark: boolean }) {
     const [auth, setAuth] = useState<AuthData | null>(null);
@@ -37,15 +38,13 @@ function App({ toggleTheme, isDark }: { toggleTheme: () => void; isDark: boolean
     const [cohortScores, setCohortScores] = useState<Scores>({});
     const [filters, setFilters] = useState<Filters>({ age_min: '', age_max: '', sex: '', gender: '', religion: '', ethnicity: '', pincode: '', city: '', district: '', state: '', country: '', nationality: '' });
     const [journalText, setJournalText] = useState('');
-    const [adContent, setAdContent] = useState<AdData | null>(null);
-    const [insightContent, setInsightContent] = useState<string | null>(null);
     const logoutTimer = useRef<NodeJS.Timeout | null>(null);
 
     const [selectedFilterCountry, setSelectedFilterCountry] = useState<ICountry | null>(null);
     const filterCountries = useMemo(() => Country.getAllCountries(), []);
     const filterStates = useMemo(() => selectedFilterCountry ? State.getStatesOfCountry(selectedFilterCountry.isoCode) : [], [selectedFilterCountry]);
 
-    const getAuthHeaders = useCallback((): { [key: string]: string } => (auth ? { 'Authorization': `Bearer ${auth.token}` } : {}), [auth]);
+    const getAuthHeaders = useCallback(() => auth ? { 'Authorization': `Bearer ${auth.token}` } : {}, [auth]);
 
     const handleLogout = useCallback(() => {
         localStorage.removeItem('auth');
@@ -69,30 +68,6 @@ function App({ toggleTheme, isDark }: { toggleTheme: () => void; isDark: boolean
         } catch (error) { console.error("Failed to fetch user scores:", error); }
     }, [auth, getAuthHeaders]);
 
-    const fetchAd = useCallback(async () => {
-        if (!auth) return;
-        try {
-            const headers = getAuthHeaders();
-            const response = await fetch(`${API_URL}/serve/ad`, { headers: headers.Authorization ? headers : undefined });
-            if (response.ok) {
-                const data = await response.json();
-                setAdContent(data);
-            }
-        } catch (error) { console.error("Failed to fetch ad:", error); }
-    }, [auth, getAuthHeaders]);
-
-    const fetchInsight = useCallback(async () => {
-        if (!auth) return;
-        try {
-            const headers = getAuthHeaders();
-            const response = await fetch(`${API_URL}/serve/insight`, { headers: headers.Authorization ? headers : undefined });
-            if (response.ok) {
-                const data = await response.json();
-                setInsightContent(data?.content || null);
-            }
-        } catch (error) { console.error("Failed to fetch insight:", error); }
-    }, [auth, getAuthHeaders]);
-
     useEffect(() => {
         const events = ['mousemove', 'keydown', 'mousedown', 'touchstart'];
         const resetTimer = () => { if (auth) resetLogoutTimer(); };
@@ -112,11 +87,7 @@ function App({ toggleTheme, isDark }: { toggleTheme: () => void; isDark: boolean
             try {
                 const foundAuth: AuthData = JSON.parse(storedAuth);
                 setAuth(foundAuth);
-                if (foundAuth.role === 'advertiser' || foundAuth.role === 'admin') {
-                    setView('advertiser_console');
-                } else {
-                    setView('dashboard');
-                }
+                setView('dashboard');
             } catch (error) {
                 console.error("Error parsing auth from localStorage", error);
                 handleLogout();
@@ -124,13 +95,7 @@ function App({ toggleTheme, isDark }: { toggleTheme: () => void; isDark: boolean
         }
     }, [handleLogout]);
 
-    useEffect(() => {
-        if (auth && (auth.role === 'user')) {
-            fetchUserScores();
-            fetchAd();
-            fetchInsight();
-        }
-    }, [auth, fetchUserScores, fetchAd, fetchInsight]);
+    useEffect(() => { if (auth) fetchUserScores(); }, [auth, fetchUserScores]);
 
     const handleLogin = async (publicKey: string, signature: string): Promise<boolean> => {
         try {
@@ -141,16 +106,11 @@ function App({ toggleTheme, isDark }: { toggleTheme: () => void; isDark: boolean
             });
             if (response.ok) {
                 const data = await response.json();
-                const newAuth: AuthData = { user_id: data.user_id, public_key: data.public_key, token: data.access_token, role: data.role };
+                const newAuth: AuthData = { user_id: data.user_id, public_key: data.public_key, token: data.access_token };
                 localStorage.setItem('auth', JSON.stringify(newAuth));
                 localStorage.setItem('last_user_pk', newAuth.public_key);
                 setAuth(newAuth);
-                
-                if (newAuth.role === 'advertiser' || newAuth.role === 'admin') {
-                    setView('advertiser_console');
-                } else {
-                    setView('dashboard');
-                }
+                setView('dashboard');
                 return true;
             }
             return false;
@@ -226,8 +186,6 @@ function App({ toggleTheme, isDark }: { toggleTheme: () => void; isDark: boolean
                 return <LoginPage onLogin={handleLogin} onSwitchToRegister={() => setView('register')} />;
             case 'register':
                 return <RegistrationPage onRegister={handleRegistration} />;
-            case 'advertiser_console':
-                return <AdvertiserConsole onLogout={handleLogout} getAuthHeaders={getAuthHeaders} apiBaseUrl={API_URL} toggleTheme={toggleTheme} isDark={isDark} />;
             case 'dashboard':
                 return (
                     <MainContainer>
@@ -240,17 +198,22 @@ function App({ toggleTheme, isDark }: { toggleTheme: () => void; isDark: boolean
                         <LeftPanel>
                             <LogoContainer><Logo className="logo-svg" /></LogoContainer>
                             <FilterPanel filters={filters} onChange={handleFilterChange} onApply={handleApplyFilters} />
-                            <InsightSlot insightText={insightContent} />
                         </LeftPanel>
                         <CenterPanel>
                             <h2>Journal</h2>
                             <TextArea value={journalText} onChange={(e: any) => setJournalText(e.target.value)} placeholder="The page is yours..." />
                             <StyledButton onClick={handleJournalSubmit} style={{ marginTop: '1rem', width: '100%' }}>Submit</StyledButton>
-                            <AdSlot adData={adContent} />
+                            <AdSlot position="journal_footer" />
                         </CenterPanel>
                         <RightPanel>
-                            <h2>Your Silhouette</h2>
-                            <ScoreChart userScores={userScores} cohortScores={cohortScores} />
+                          <div className="ad-slot">
+                            <AdSlot mediaUrl={adMessage?.mediaUrl || null} />
+                          </div>
+                          <div className="insight-slot">
+                            <InsightSlot text={insightMessage?.text || null} />
+                          </div>
+                        //    <h2>Your Silhouette</h2>
+                         //   <ScoreChart userScores={userScores} cohortScores={cohortScores} />
                         </RightPanel>
                     </MainContainer>
                 );

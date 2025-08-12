@@ -1,62 +1,22 @@
 # backend/schemas.py
-from pydantic import BaseModel, Field, Json
+from pydantic import BaseModel, Field
 import uuid
 from datetime import datetime
-from typing import Optional, Dict, Any
-
-# --- User Schemas ---
+from typing import Optional
 
 class UserCreate(BaseModel):
     public_key: str = Field(..., description="User's public key, generated client-side.")
     age: Optional[int] = Field(None, description="User's age.")
-    sex: Optional[str] = Field(None, description="User's biological sex.")
-    gender: Optional[str] = Field(None, description="User's gender identity.")
-    religion: Optional[str] = Field(None, description="User's religious affiliation.")
-    ethnicity: Optional[str] = Field(None, description="User's ethnicity.")
+    sex: Optional[str] = Field(None, description="User's biological sex (e.g., 'Male', 'Female', 'Non-binary', 'Prefer not to say').")
+    gender: Optional[str] = Field(None, description="User's gender identity (e.g., 'Man', 'Woman', 'Non-binary', 'Prefer not to say').")
+    religion: Optional[str] = Field(None, description="User's religious affiliation (e.g., 'Christianity', 'Islam', 'None', 'Prefer not to say').")
+    ethnicity: Optional[str] = Field(None, description="User's ethnicity (e.g., 'Asian', 'Caucasian', 'African', 'Prefer not to say').")
     pincode: Optional[str] = Field(None, description="User's residential pincode.")
     city: Optional[str] = Field(None, description="User's city.")
     district: Optional[str] = Field(None, description="User's district.")
     state: Optional[str] = Field(None, description="User's state.")
     country: Optional[str] = Field(None, description="User's country.")
     nationality: Optional[str] = Field(None, description="User's nationality.")
-
-class UserCreateResponse(BaseModel):
-    user_id: uuid.UUID
-    public_key: str
-    role: str
-    created_at: datetime
-
-class UserResponse(BaseModel):
-    user_id: uuid.UUID
-    public_key: str
-    role: str
-    created_at: datetime
-    advertiser_profile: Optional['AdvertiserProfileResponse'] = None
-
-    class Config:
-        from_attributes = True
-
-# --- Advertiser Schemas ---
-
-class AdvertiserProfileCreate(BaseModel):
-    company_name: str
-
-class AdvertiserProfileResponse(BaseModel):
-    id: uuid.UUID
-    company_name: str
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
-
-class AdvertiserCreate(UserCreate):
-    company_name: str
-
-class AdvertiserCreateResponse(BaseModel):
-    user: UserCreateResponse
-    profile: AdvertiserProfileResponse
-
-# --- Auth Schemas ---
 
 class ChallengeRequest(BaseModel):
     public_key: str
@@ -68,19 +28,28 @@ class UserLogin(BaseModel):
     public_key: str
     signature: str
 
+class UserCreateResponse(BaseModel):
+    user_id: uuid.UUID
+    public_key: str
+    created_at: datetime
+
+class UserResponse(BaseModel):
+    user_id: uuid.UUID
+    public_key: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True # Allows Pydantic to read ORM models
+
+class PostCreate(BaseModel):
+    raw_text: str
+    category: Optional[str] = None
+
 class Token(BaseModel):
     access_token: str
     token_type: str
     user_id: str
     public_key: str
-    role: str # Added role
-
-
-# --- Post Schemas ---
-
-class PostCreate(BaseModel):
-    raw_text: str
-    category: Optional[str] = None
 
 class PostResponse(BaseModel):
     id: uuid.UUID
@@ -92,43 +61,124 @@ class PostResponse(BaseModel):
     class Config:
         from_attributes = True
 
-# --- Campaign Schemas ---
-
-class CampaignCreate(BaseModel):
+class AdvertiserCreate(BaseModel):
     name: str
-    campaign_type: str = Field(..., description="Type of campaign: 'ad' or 'insight'.")
-    content: Dict[str, Any] = Field(..., description="JSON object for ad creative or insight text.")
-    targeting_criteria: Dict[str, Any] = Field(..., description="JSON object defining the target audience.")
-    status: str = 'draft'
-    budget: Optional[float] = None
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
+    contact_email: str
 
-class CampaignResponse(BaseModel):
+
+class AdvertiserResponse(BaseModel):
     id: uuid.UUID
-    advertiser_id: Optional[uuid.UUID]
     name: str
-    campaign_type: str
-    status: str
-    content: Dict[str, Any]
-    targeting_criteria: Dict[str, Any]
-    budget: Optional[float]
-    start_date: datetime
-    end_date: Optional[datetime]
-    impressions_count: int
+    contact_email: str
     created_at: datetime
 
     class Config:
         from_attributes = True
 
-# --- Serving Schemas ---
 
-class AdResponse(BaseModel):
+class CampaignCreate(BaseModel):
+    advertiser_id: uuid.UUID
+    filter_definition: dict
+    duration_days: int
+    frequency: int
+
+
+class CampaignResponse(BaseModel):
+    id: uuid.UUID
+    advertiser_id: uuid.UUID
+    filter_definition: dict
+    duration_days: int
+    frequency: int
+    status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class AdCreativeCreate(BaseModel):
     campaign_id: uuid.UUID
-    content: Dict[str, Any]
+    media_url: str
+    text: Optional[str] = None
+
+
+class AdCreativeResponse(BaseModel):
+    id: uuid.UUID
+    campaign_id: uuid.UUID
+    media_url: str
+    text: Optional[str]
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# =====================
+# Advertiser & Campaign Schemas
+# =====================
+
+class AdvertiserCreate(BaseModel):
+    name: str
+    contact_email: str
+
+
+class AdvertiserResponse(BaseModel):
+    id: uuid.UUID
+    name: str
+    contact_email: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class CampaignCreate(BaseModel):
+    advertiser_id: uuid.UUID
+    filter_definition: dict
+    duration_days: int
+    frequency: int
+
+
+class CampaignResponse(BaseModel):
+    id: uuid.UUID
+    advertiser_id: uuid.UUID
+    filter_definition: dict
+    duration_days: int
+    frequency: int
+    status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class AdCreativeCreate(BaseModel):
+    campaign_id: uuid.UUID
+    media_url: str
+    text: Optional[str] = None
+
+
+class AdCreativeResponse(BaseModel):
+    id: uuid.UUID
+    campaign_id: uuid.UUID
+    media_url: str
+    text: Optional[str]
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+#================
+#Insights schemas
+#================
+
+class InsightCreate(BaseModel):
+    text: str
+
 
 class InsightResponse(BaseModel):
-    content: str # Insights are just simple text
+    id: uuid.UUID
+    text: str
+    created_at: datetime
 
-# This is needed for Pydantic to handle the forward reference in UserResponse
-UserResponse.update_forward_refs()
+    class Config:
+        from_attributes = True

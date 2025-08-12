@@ -8,12 +8,13 @@ RUN apk add --no-cache postgresql-client build-base
 
 # Copy worker-specific requirements (relative to the build context: ./)
 COPY worker/requirements.txt .
+
 COPY ./shared_config/silhouet_config.py .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip list
 # Copy the backend application code from the root context
 COPY backend/ /app/backend_code/
-
+#COPY worker/*.py /app/backed_code/
 # Set Python path
 ENV PYTHONPATH /app/backend_code/

@@ -1,20 +1,15 @@
 // src/theme.ts
 export const darkTheme = {
   colors: {
-    background: '#2d2d2d',
-    panel: '#352a25',
-    text: '#e8e4d5',
+    background: '#1e1e1e',
+    panel: '#2a2a2a',
+    text: '#f0f0f0',
     accent: '#c5b358',
-    accent2: '#b87333',
     buttonBg: '#c5b358',
-    buttonText: '#2d2d2d',
-    paper: '#f5f5dc',
-    textOnPaper: '#3d3d3d',
-    borderColor: '#4b3832',
+    buttonText: '#1e1e1e',
   },
   font: {
-    family: "'Courier New', Courier, monospace",
-    familySerif: "'Garamond', serif",
+    family: 'Inter, sans-serif',
     size: '16px'
   },
   spacing: (factor: number) => `${factor * 8}px`
@@ -22,20 +17,15 @@ export const darkTheme = {
 
 export const lightTheme = {
   colors: {
-    background: '#f5f5dc',
+    background: '#f5f5f5',
     panel: '#ffffff',
-    text: '#3d3d3d',
+    text: '#222222',
     accent: '#c5b358',
-    accent2: '#b87333',
     buttonBg: '#c5b358',
     buttonText: '#ffffff',
-    paper: '#ffffff',
-    textOnPaper: '#3d3d3d',
-    borderColor: '#4b3832',
   },
   font: {
-    family: "'Courier New', Courier, monospace",
-    familySerif: "'Garamond', serif",
+    family: 'Inter, sans-serif',
     size: '16px'
   },
   spacing: (factor: number) => `${factor * 8}px`

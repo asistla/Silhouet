@@ -6,21 +6,13 @@ from typing import Optional, List
 from jose import JWTError, jwt
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.orm import Session
-
-# Local imports are now needed here
-from database import get_db
-from crud import users
-from models import User
 
 load_dotenv()
 
+# The path to the file where keys are stored, consistent with keymanager.py and docker-compose.yml
 KEYS_FILE = '/keys/rotating_keys.json'
 ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
 def get_keys() -> List[str]:
     """Reads the list of valid keys from the keys file."""
@@ -28,6 +20,8 @@ def get_keys() -> List[str]:
         with open(KEYS_FILE, 'r') as f:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
+        # If the file doesn't exist or is empty/corrupt, we cannot proceed.
+        # The entrypoint script should prevent this, but this is a safeguard.
         raise RuntimeError("Could not load secret keys. The key file is missing or invalid.")
 
 class TokenData(BaseModel):
@@ -41,6 +35,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
         expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     
+    # Always sign with the newest key (the first one in the list)
     keys = get_keys()
     if not keys:
         raise RuntimeError("No secret keys available for signing.")
@@ -50,6 +45,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 def verify_token(token: str, credentials_exception):
+    # Get all valid keys for verification
     valid_keys = get_keys()
     if not valid_keys:
         raise credentials_exception
@@ -60,41 +56,15 @@ def verify_token(token: str, credentials_exception):
             payload = jwt.decode(token, key, algorithms=[ALGORITHM])
             public_key: str = payload.get("sub")
             if public_key is None:
+                # This case should ideally not be hit if the token was signed correctly
                 continue 
             return TokenData(sub=public_key)
         except JWTError as e:
+            # Store the exception but continue to try other keys
             last_exception = e
             continue
     
+    # If the loop completes without returning, it means no key worked.
+    # We raise the original credentials_exception for consistency,
+    # but you could also raise the last_exception for more specific debugging.
     raise credentials_exception
-
-# --- User and Role Dependencies ---
-
-async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
-    """Dependency to get the current user from a token."""
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    token_data = verify_token(token, credentials_exception)
-    user = users.get_user_by_public_key(db, public_key=token_data.sub)
-    if user is None:
-        raise credentials_exception
-    return user
-
-class RoleChecker:
-    """
-    Dependency factory to check for user roles.
-    Usage: `Depends(RoleChecker(['admin', 'advertiser']))`
-    """
-    def __init__(self, allowed_roles: List[str]):
-        self.allowed_roles = allowed_roles
-
-    def __call__(self, current_user: User = Depends(get_current_user)):
-        if current_user.role not in self.allowed_roles:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Operation not permitted. Required role: {', '.join(self.allowed_roles)}."
-            )
-        return current_user
