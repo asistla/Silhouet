@@ -3,6 +3,9 @@
 # Define your comprehensive list of personality keys.
 # This list must be identical and ordered consistently across all services
 # that refer to personality scores.
+
+SCALE_FACTOR = 10
+
 PERSONALITY_KEYS = [
     "intellectual_honesty",
     "courage",
