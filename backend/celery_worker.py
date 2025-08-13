@@ -11,7 +11,9 @@ from database import SessionLocal
 from models import Post, User
 from crud.users import update_user_scores
 from silhouet_config import PERSONALITY_KEYS
-#from nacl.encoding import Base64Encoder
+
+from workers.ads_worker import push_ads_for_campaign
+from workers.insight_worker import push_insight
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -109,4 +111,27 @@ def process_post_sentiment_task(post_id: str, raw_text: str):
         if db:
             db.close()
 
-# No main block needed, Celery worker command handles execution.
+#=====================
+#ads/insights pipeline
+#=====================
+
+@celery_app.task(name="push_ads")
+def push_ads_task():
+    push_ads_to_queue()
+
+@celery_app.task(name="push_insights")
+def push_insights_task():
+    push_insights_to_queue()
+
+# Beat schedule (merged into existing config)
+celery_app.conf.beat_schedule = getattr(celery_app.conf, "beat_schedule", {})
+celery_app.conf.beat_schedule.update({
+    "push_ads_every_minute": {
+        "task": "push_ads",
+        "schedule": 60.0,  # every 1 min (MVP)
+    },
+    "push_insights_every_two_minutes": {
+        "task": "push_insights",
+        "schedule": 120.0,  # every 2 min (MVP)
+    },
+})

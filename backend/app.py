@@ -28,9 +28,11 @@ from silhouet_config import PERSONALITY_KEYS
 from models import User
 from auth import create_access_token, verify_token
 
+from routes import messages
+
 load_dotenv()
 app = FastAPI()
-
+app.include_router(messages.router)
 # --- Security ---
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login")
 

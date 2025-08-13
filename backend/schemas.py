@@ -60,3 +60,125 @@ class PostResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class AdvertiserCreate(BaseModel):
+    name: str
+    contact_email: str
+
+
+class AdvertiserResponse(BaseModel):
+    id: uuid.UUID
+    name: str
+    contact_email: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class CampaignCreate(BaseModel):
+    advertiser_id: uuid.UUID
+    filter_definition: dict
+    duration_days: int
+    frequency: int
+
+
+class CampaignResponse(BaseModel):
+    id: uuid.UUID
+    advertiser_id: uuid.UUID
+    filter_definition: dict
+    duration_days: int
+    frequency: int
+    status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class AdCreativeCreate(BaseModel):
+    campaign_id: uuid.UUID
+    media_url: str
+    text: Optional[str] = None
+
+
+class AdCreativeResponse(BaseModel):
+    id: uuid.UUID
+    campaign_id: uuid.UUID
+    media_url: str
+    text: Optional[str]
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# =====================
+# Advertiser & Campaign Schemas
+# =====================
+
+class AdvertiserCreate(BaseModel):
+    name: str
+    contact_email: str
+
+
+class AdvertiserResponse(BaseModel):
+    id: uuid.UUID
+    name: str
+    contact_email: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class CampaignCreate(BaseModel):
+    advertiser_id: uuid.UUID
+    filter_definition: dict
+    duration_days: int
+    frequency: int
+
+
+class CampaignResponse(BaseModel):
+    id: uuid.UUID
+    advertiser_id: uuid.UUID
+    filter_definition: dict
+    duration_days: int
+    frequency: int
+    status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class AdCreativeCreate(BaseModel):
+    campaign_id: uuid.UUID
+    media_url: str
+    text: Optional[str] = None
+
+
+class AdCreativeResponse(BaseModel):
+    id: uuid.UUID
+    campaign_id: uuid.UUID
+    media_url: str
+    text: Optional[str]
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+#================
+#Insights schemas
+#================
+
+class InsightCreate(BaseModel):
+    text: str
+
+
+class InsightResponse(BaseModel):
+    id: uuid.UUID
+    text: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

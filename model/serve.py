@@ -67,7 +67,7 @@ async def score_text(request: ScoreRequest):
     if not text:
         raise HTTPException(status_code=400, detail="No text provided")
 
-    print(f"[Scoring] Text: {text[:60]}...")
+    #print(f"[Scoring] Text: {text[:60]}...")
 
     sentences = re.findall('\w+', text) #split_sentences(text)
     doc = nlp(text)
@@ -132,7 +132,7 @@ async def score_text(request: ScoreRequest):
     # Softmax normalization
     score_values = np.array(list(final_scores.values()))
     exp_scores = np.exp(score_values - np.max(score_values))
-    softmax_scores = exp_scores / exp_scores.sum()
+    softmax_scores = SCALE_FACTOR * exp_scores / exp_scores.sum()
     final_scores = dict(zip(final_scores.keys(), softmax_scores.tolist()))
 
     return json.dumps({"scores": final_scores})
