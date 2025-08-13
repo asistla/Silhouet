@@ -7,6 +7,8 @@ export const darkTheme = {
     accent: '#c5b358',
     buttonBg: '#c5b358',
     buttonText: '#1e1e1e',
+    borderColor: '#3a3a3a',
+    inputBackground: '#2e2e2e',
   },
   font: {
     family: 'Inter, sans-serif',
@@ -23,6 +25,8 @@ export const lightTheme = {
     accent: '#c5b358',
     buttonBg: '#c5b358',
     buttonText: '#ffffff',
+    borderColor: '#dcdcdc',
+    inputBackground: '#ffffff',
   },
   font: {
     family: 'Inter, sans-serif',

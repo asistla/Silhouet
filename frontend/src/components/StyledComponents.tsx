@@ -1,5 +1,51 @@
 import styled from 'styled-components';
 
+// ==================================================================
+// Generic Components for Advertiser Console & Other Future Views
+// ==================================================================
+
+export const Container = styled.div`
+  padding: ${({ theme }) => theme.spacing(3)};
+  background-color: ${({ theme }) => theme.colors.background};
+  color: ${({ theme }) => theme.colors.text};
+  min-height: 100vh;
+`;
+
+export const Title = styled.h1`
+  font-size: 2.5rem;
+  color: ${({ theme }) => theme.colors.accent};
+  margin-bottom: ${({ theme }) => theme.spacing(3)};
+  text-align: center;
+  font-family: ${({ theme }) => theme.font.family};
+`;
+
+export const Section = styled.section`
+  margin-bottom: ${({ theme }) => theme.spacing(4)};
+  padding: ${({ theme }) => theme.spacing(3)};
+  background-color: ${({ theme }) => theme.colors.panel};
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+`;
+
+export const SectionTitle = styled.h2`
+  font-size: 1.8rem;
+  border-bottom: 2px solid ${({ theme }) => theme.colors.accent};
+  padding-bottom: ${({ theme }) => theme.spacing(1)};
+  margin-bottom: ${({ theme }) => theme.spacing(3)};
+  color: ${({ theme }) => theme.colors.text};
+`;
+
+export const Grid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: ${({ theme }) => theme.spacing(3)};
+`;
+
+
+// ==================================================================
+// Main Application Layout Components
+// ==================================================================
+
 // Main layout container
 export const MainContainer = styled.div`
   display: flex;
@@ -95,7 +141,7 @@ export const StyledButton = styled.button`
   padding: ${({ theme }) => `${theme.spacing(1.5)} ${theme.spacing(3)}`};
   border-radius: 4px;
   cursor: pointer;
-  font-family: ${({ theme }) => theme.font.familySerif};
+  font-family: ${({ theme }) => theme.font.family};
   font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 1.5px;
@@ -106,7 +152,7 @@ export const StyledButton = styled.button`
   justify-content: center;
 
   &:hover {
-    background-color: ${({ theme }) => theme.colors.accent2};
+    background-color: ${({ theme }) => theme.colors.accent};
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
     transform: translateY(-2px);
   }
@@ -149,6 +195,7 @@ export const LogoContainer = styled.div`
     width: 80%;
     height: auto;
     fill: ${({ theme }) => theme.colors.accent};
-    filter: drop-shadow(0 0 5px ${({ theme }) => theme.colors.accent2});
+    filter: drop-shadow(0 0 5px ${({ theme }) => theme.colors.accent});
   }
 `;
+

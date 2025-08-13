@@ -1,53 +1,36 @@
 // frontend/src/AdvertiserConsole.tsx
-import React, { useState, useCallback } from 'react';
-import { MainContainer, LeftPanel, RightPanel, LogoutButton, StyledButton } from './components/StyledComponents';
-import { CampaignList } from './components/advertiser/CampaignList';
-import { CampaignForm } from './components/advertiser/CampaignForm';
-import { ReactComponent as Logo } from './logo.svg';
+import React from 'react';
+import { usePolling } from './hooks/usePolling';
+import { AD_FEED_ENDPOINT, INSIGHT_FEED_ENDPOINT } from './config';
+import { AdSlot } from './components/ui/AdSlot';
+import InsightSlot from './components/ui/InsightSlot';
+import { Container, Title, Section, SectionTitle, Grid } from './components/StyledComponents';
+import { Ad, Insight } from './types'; // Import types from the new central file
 
-interface AdvertiserConsoleProps {
-  onLogout: () => void;
-  getAuthHeaders: () => { [key: string]: string };
-  apiBaseUrl: string;
-  toggleTheme: () => void;
-  isDark: boolean;
-}
-
-const AdvertiserConsole: React.FC<AdvertiserConsoleProps> = ({ onLogout, getAuthHeaders, apiBaseUrl, toggleTheme, isDark }) => {
-  // A simple key to force re-render of the CampaignList when a new campaign is created
-  const [campaignListKey, setCampaignListKey] = useState(0);
-
-  const handleCampaignCreated = useCallback(() => {
-    setCampaignListKey(prevKey => prevKey + 1);
-  }, []);
+const AdvertiserConsole: React.FC = () => {
+  // Fetch ads using the usePolling hook
+  const { data: ads, isLoading: isLoadingAds, error: adsError } = usePolling<Ad>(AD_FEED_ENDPOINT, 5000);
 
   return (
-    <MainContainer>
-      <StyledButton 
-        onClick={toggleTheme} 
-        style={{ position: 'absolute', top: '2rem', left: '2rem', zIndex: 10 }}>
-          {isDark ? 'Light Mode' : 'Dark Mode'}
-      </StyledButton>
-      <LogoutButton onClick={onLogout}>Logout</LogoutButton>
-      
-      <LeftPanel>
-        <div className="logo-container"><Logo className="logo-svg" /></div>
-        <CampaignForm 
-          getAuthHeaders={getAuthHeaders} 
-          apiBaseUrl={apiBaseUrl} 
-          onCampaignCreated={handleCampaignCreated} 
-        />
-      </LeftPanel>
-      
-      <RightPanel style={{ width: '80%' }}>
-        <h2>Campaign Dashboard</h2>
-        <CampaignList 
-          key={campaignListKey} 
-          getAuthHeaders={getAuthHeaders} 
-          apiBaseUrl={apiBaseUrl} 
-        />
-      </RightPanel>
-    </MainContainer>
+    <Container>
+      <Title>Advertiser & Insight Console</Title>
+
+      <Section>
+        <SectionTitle>Live Ad Feed</SectionTitle>
+        {isLoadingAds && <p>Loading ads...</p>}
+        {adsError && <p>Error loading ads: {adsError.message}</p>}
+        <Grid>
+          {ads.map((ad) => (
+            <AdSlot
+              key={ad.id}
+              title={ad.title}
+              content={ad.content}
+              callToAction={ad.call_to_action}
+            />
+          ))}
+        </Grid>
+      </Section>
+    </Container>
   );
 };
 

@@ -13,14 +13,12 @@ import ScoreChart from './components/ScoreChart';
 import { MainContainer, LeftPanel, CenterPanel, RightPanel, TextArea, StyledButton, LogoutButton, LogoContainer } from './components/StyledComponents';
 import { FilterPanel } from './components/ui/FilterPanel';
 import { AdSlot } from './components/ui/AdSlot';
+import InsightSlot from './components/ui/InsightSlot';
 
-import useServePolling from "./hooks/useServePolling";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || '';
 const API_URL = `${API_BASE_URL}/api`;
 const LOGOUT_DELAY = parseInt(process.env.REACT_APP_AUTO_LOGOUT_DELAY || '600000', 10);
-
-const { adMessage, insightMessage } = useServePolling(15000); //every 15 seconds
  
 interface Scores { [key: string]: number; }
 interface Filters { [key: string]: string; }
@@ -207,13 +205,13 @@ function App({ toggleTheme, isDark }: { toggleTheme: () => void; isDark: boolean
                         </CenterPanel>
                         <RightPanel>
                           <div className="ad-slot">
-                            <AdSlot mediaUrl={adMessage?.mediaUrl || null} />
+                            <AdSlot title="Ad" content="Sample Ad Content" callToAction="Click Here" />
                           </div>
                           <div className="insight-slot">
-                            <InsightSlot text={insightMessage?.text || null} />
+                            <InsightSlot text="Sample insight text"/>
                           </div>
-                        //    <h2>Your Silhouette</h2>
-                         //   <ScoreChart userScores={userScores} cohortScores={cohortScores} />
+                            <h2>Your Silhouette</h2>
+                            <ScoreChart userScores={userScores} cohortScores={cohortScores} />
                         </RightPanel>
                     </MainContainer>
                 );

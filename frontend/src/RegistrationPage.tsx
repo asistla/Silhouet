@@ -128,4 +128,22 @@ const RegistrationPage: React.FC<RegistrationPageProps> = ({ onRegister }) => {
     );
 };
 
+const CenteredHeader = styled.h2`
+  text-align: center;
+  font-family: ${({ theme }) => theme.font.familySerif};
+  color: ${({ theme }) => theme.colors.accent};
+  margin-bottom: 2rem;
+`;
+
+const InfoText = styled.p`
+  text-align: center;
+  margin-bottom: 2rem;
+  opacity: 0.8;
+`;
+
+const FullWidthButton = styled(StyledButton)`
+  width: 100%;
+  margin-top: 2rem;
+`;
+
 export default RegistrationPage;
