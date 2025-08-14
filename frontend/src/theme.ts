@@ -11,6 +11,7 @@ export const darkTheme = {
     paper: '#f5f5dc',
     textOnPaper: '#3d3d3d',
     borderColor: '#4b3832',
+    borderRadius: '4px',
   },
   font: {
     family: "'Courier New', Courier, monospace",
@@ -32,6 +33,7 @@ export const lightTheme = {
     paper: '#ffffff',
     textOnPaper: '#3d3d3d',
     borderColor: '#4b3832',
+    borderRadius: '4px',
   },
   font: {
     family: "'Courier New', Courier, monospace",
