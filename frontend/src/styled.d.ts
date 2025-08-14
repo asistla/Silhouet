@@ -5,17 +5,20 @@ declare module 'styled-components' {
   export interface DefaultTheme {
     colors: {
       background: string;
-      borderColor : string;
       panel: string;
       text: string;
       accent: string;
+      accent2: string;
       buttonBg: string;
       buttonText: string;
-      inputBackground: string;
-      
+      paper: string;
+      textOnPaper: string;
+      borderColor: string;
+      borderRadius: string;
     };
     font: {
       family: string;
+      familySerif: string;
       size: string;
     };
     spacing: (factor: number) => string;

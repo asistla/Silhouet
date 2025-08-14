@@ -1,5 +1,51 @@
 import styled from 'styled-components';
 
+// ==================================================================
+// Generic Components for Advertiser Console & Other Future Views
+// ==================================================================
+
+export const Container = styled.div`
+  padding: ${({ theme }) => theme.spacing(3)};
+  background-color: ${({ theme }) => theme.colors.background};
+  color: ${({ theme }) => theme.colors.text};
+  min-height: 100vh;
+`;
+
+export const Title = styled.h1`
+  font-size: 2.5rem;
+  color: ${({ theme }) => theme.colors.accent};
+  margin-bottom: ${({ theme }) => theme.spacing(3)};
+  text-align: center;
+  font-family: ${({ theme }) => theme.font.family};
+`;
+
+export const Section = styled.section`
+  margin-bottom: ${({ theme }) => theme.spacing(4)};
+  padding: ${({ theme }) => theme.spacing(3)};
+  background-color: ${({ theme }) => theme.colors.panel};
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+`;
+
+export const SectionTitle = styled.h2`
+  font-size: 1.8rem;
+  border-bottom: 2px solid ${({ theme }) => theme.colors.accent};
+  padding-bottom: ${({ theme }) => theme.spacing(1)};
+  margin-bottom: ${({ theme }) => theme.spacing(3)};
+  color: ${({ theme }) => theme.colors.text};
+`;
+
+export const Grid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: ${({ theme }) => theme.spacing(3)};
+`;
+
+
+// ==================================================================
+// Main Application Layout Components
+// ==================================================================
+
 // Main layout container
 export const MainContainer = styled.div`
   display: flex;
@@ -22,21 +68,36 @@ export const LeftPanel = styled.div`
 
 // Center panel
 export const CenterPanel = styled.div`
-  flex: 1 1 60%; /* Flexible width */
+  flex: 1 1 60%;
   padding: ${({ theme }) => theme.spacing(3)};
   display: flex;
   flex-direction: column;
 `;
 
+// New container for ScoreChart
+export const ScoreChartContainer = styled.div`
+  height: 250px;
+  margin-top: ${({ theme }) => theme.spacing(2)};
+`;
+
 // Right panel
 export const RightPanel = styled.div`
-  flex: 1 1 40%; /* Flexible width */
+  flex: 1 1 40%;
   padding: ${({ theme }) => theme.spacing(3)};
   border-left: 1px solid ${({ theme }) => theme.colors.borderColor};
   background-color: ${({ theme }) => theme.colors.panel};
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
+  gap: ${({ theme }) => theme.spacing(2)};
+  
+  /* Children split */
+  & > .ad-slot {
+    flex: 0 0 40%;
+  }
+
+  & > .insight-slot {
+    flex: 0 0 60%;
+  }
 `;
 
 // Journal textarea
@@ -49,7 +110,7 @@ export const TextArea = styled.textarea`
   border-radius: 4px;
   padding: ${({ theme }) => theme.spacing(2)};
   font-family: ${({ theme }) => theme.font.family};
-  font-size: 1.1rem;
+ font-size: 1.1rem;
   line-height: 1.7;
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
   resize: none;
@@ -64,7 +125,7 @@ export const StyledButton = styled.button`
   padding: ${({ theme }) => `${theme.spacing(1.5)} ${theme.spacing(3)}`};
   border-radius: 4px;
   cursor: pointer;
-  font-family: ${({ theme }) => theme.font.familySerif};
+  font-family: ${({ theme }) => theme.font.family};
   font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 1.5px;
@@ -121,3 +182,4 @@ export const LogoContainer = styled.div`
     filter: drop-shadow(0 0 5px ${({ theme }) => theme.colors.accent2});
   }
 `;
+
