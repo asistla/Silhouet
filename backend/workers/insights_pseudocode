@@ -1,254 +1,116 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# workers/insight_worker.py  (PSEUDOCODE)
-# Cohort-gated insight generation:
-#   • Zipcode-level: extract claim candidates from posts → semantic aggregation
-#   • Higher levels: aggregate only from lower-level insights (no direct posts)
-#   • Thresholds use % of REGISTERED USERS in the cohort (not active posters)
-#   • Ephemeral/broadcast insights are pushed to the existing message queue
-# ─────────────────────────────────────────────────────────────────────────────
+# insight_worker.py
 
-from datetime import datetime, timedelta
-from typing import List, Dict, Tuple
+from typing import List, Dict
+from workers.message_queue import publish_message
+from semantic_engine import semantic_cluster, contains_socially_relevant_keyword
+from db import get_zipcode_users, get_higher_cohorts, save_insight
+from settings import GATING_THRESHOLDS  # % thresholds per cohort level
 
-# ── CONFIG (read from env or shared_config) ───────────────────────────────────
-COHORT_LEVELS_ORDER = ["pincode", "city", "district", "state", "country", "global"]
 
-THRESHOLDS = {
-    "pincode": 0.10,   # 10% of registered users
-    "city":    0.08,
-    "district":0.06,
-    "state":   0.05,
-    "country": 0.04,
-    "global":  0.03,
-}
-
-# Window for pulling posts at zipcode level (e.g., last 24h), and
-# for counting corroborations at every level (same bucket width).
-INSIGHT_WINDOW_HOURS = 24
-
-# Re-surface cooldown to avoid spamming the same cohort with the same claim.
-SURFACE_COOLDOWN_HOURS = 6
-
-# Semantic aggregation knobs
-SIMILARITY_THRESHOLD = 0.85         # cosine similarity to cluster claims
-MIN_SENTENCE_LEN = 5                 # tokens; ignore fragments
-
-# ── STORAGE ABSTRACTIONS (define with DB or Redis under the hood) ────────────
-class CohortRegistry:
-    """Maps cohort level + geo_id → registered user count."""
-    def get_registered_count(self, level: str, geo_id: str) -> int: ...
-    def enumerate_geo_ids(self, level: str) -> List[str]: ...
-    def children_of(self, level: str, geo_id: str) -> List[Tuple[str, str]]:
-        """Return list of (child_level, child_geo_id) that roll up into (level, geo_id)."""
-        ...
-
-class ClaimTallyStore:
+### ---------------------------
+###   Step 1: Receive Candidates
+### ---------------------------
+def receive_candidates_from_scoring(post_id: str, user_id: str, zipcode: str, candidates: List[str]):
     """
-    Time-bucketed counters of claim clusters per cohort.
-    Backed by DB tables or Redis hashes/ZSETs.
-    Keys include: (level, geo_id, window_start).
-    Each claim cluster record stores: centroid_embedding, canonical_text, count.
+    Entry point: called whenever a post is processed by scoring engine.
+    Receives candidate sentences that have already passed the funnel.
     """
-    def window_start(self, now: datetime) -> datetime: ...
-    def upsert_clusters(self, level: str, geo_id: str, window_start: datetime,
-                        clusters: List[Tuple[str, "Embedding", int]]) -> None: ...
-    def fetch_clusters(self, level: str, geo_id: str,
-                       window_start: datetime) -> List[Tuple[str, "Embedding", int]]: ...
-    def fetch_child_clusters_merged(self, level: str, geo_id: str,
-                                    window_start: datetime) -> List[Tuple[str, "Embedding", int]]:
-        """
-        Pull clusters from all children cohorts in this window and return a merged list
-        (semantic-merged across children).
-        """
-        ...
+    # Store candidates in short-lived storage (Redis / temp DB table)
+    store_candidates(zipcode, user_id, candidates)
 
-class SurfacedInsightLog:
-    """
-    Records (claim, level, geo_id) surfaced timestamp to enforce cooldown.
-    """
-    def recently_surfaced(self, claim: str, level: str, geo_id: str,
-                          cooldown_hours: int) -> bool: ...
-    def mark_surfaced(self, claim: str, level: str, geo_id: str, when: datetime) -> None: ...
 
-class MessageQueue:
-    """Pushes ephemeral broadcast insights to the same queue used by /messages/next."""
-    def push_insight(self, payload: dict) -> None: ...
-
-# ── NLP / SEMANTIC HELPERS (to be implemented using your existing model stack) ─
-def split_into_sentences(text: str) -> List[str]: ...
-def contains_social_relevance_term(sentence: str) -> bool: ...
-def is_personal_preference(sentence: str) -> bool: ...
-def is_mundane_personal_event(sentence: str) -> bool: ...
-def get_sentence_embedding(sentence: str) -> "Embedding": ...
-def cosine_similarity(a: "Embedding", b: "Embedding") -> float: ...
-
-def extract_claim_candidates(raw_text: str) -> List[str]:
+### ---------------------------
+###   Step 2: Periodic Aggregation
+### ---------------------------
+def run_zipcode_level_aggregation():
     """
-    Step 1 (flipped funnel): keep only sentences with socially-relevant terms.
-    Step 2: drop personal preferences.
-    Step 3: drop mundane personal events.
-    Everything else = claim candidate.
+    Runs periodically (e.g. every hour) to aggregate candidate assertions
+    into zipcode-level insights using semantic clustering.
     """
-    candidates = []
-    for sent in split_into_sentences(raw_text):
-        if len(sent.split()) < MIN_SENTENCE_LEN:
+
+    # Get all stored candidates for this run
+    all_zipcodes = get_all_zipcodes_with_candidates()
+
+    for zipcode in all_zipcodes:
+        candidates = load_candidates(zipcode)
+
+        if not candidates:
             continue
-        if not contains_social_relevance_term(sent):
-            continue
-        if is_personal_preference(sent):
-            continue
-        if is_mundane_personal_event(sent):
-            continue
-        candidates.append(sent.strip())
-    return candidates
 
-def cluster_claims_semantically(sentences: List[str],
-                               sim_threshold: float = SIMILARITY_THRESHOLD
-                               ) -> List[Tuple[str, "Embedding", int]]:
+        # Step 2a: Semantic clustering → group similar sentences
+        clusters = semantic_cluster(candidates)  
+        # clusters = { cluster_id: [ {user_id, text}, ... ] }
+
+        # Step 2b: Count unique users per cluster
+        insights_for_zip = []
+        total_users_in_zip = get_zipcode_user_count(zipcode)
+
+        for cluster_id, entries in clusters.items():
+            unique_users = set(e['user_id'] for e in entries)
+            user_pct = len(unique_users) / total_users_in_zip
+
+            if user_pct >= GATING_THRESHOLDS['zipcode']:
+                insight_text = generate_insight_text(entries)
+                insights_for_zip.append({
+                    'cohort_level': 'zipcode',
+                    'cohort_id': zipcode,
+                    'text': insight_text,
+                    'user_pct': user_pct
+                })
+
+        # Step 2c: Save insights to DB + publish to insights queue
+        for insight in insights_for_zip:
+            save_insight(insight)
+            publish_message('insights', insight)  # Goes into insights slot
+
+    # After processing, clear stored candidates for next cycle
+    clear_all_candidates()
+
+
+### ---------------------------
+###   Step 3: Bubble-Up
+### ---------------------------
+def run_higher_cohort_bubble_up():
     """
-    Greedy online clustering:
-    returns a list of (canonical_text, centroid_embedding, count).
-    Canonical text = first sentence to create the cluster.
+    Runs periodically after zipcode-level aggregation.
+    Builds higher-level insights from lower-level cohort insights.
     """
-    clusters: List[Tuple[str, "Embedding", int]] = []  # [(text, centroid, count)]
-    for s in sentences:
-        emb = get_sentence_embedding(s)
-        match_idx = None
-        best_sim = 0.0
-        for i, (_text, centroid, count) in enumerate(clusters):
-            sim = cosine_similarity(emb, centroid)
-            if sim > best_sim and sim >= sim_threshold:
-                best_sim = sim
-                match_idx = i
-        if match_idx is None:
-            clusters.append((s, emb, 1))
-        else:
-            # update centroid (simple running average placeholder; replace with weighted normalize)
-            old_text, old_centroid, old_count = clusters[match_idx]
-            new_count = old_count + 1
-            new_centroid = blend_centroids(old_centroid, emb, old_count, 1)
-            clusters[match_idx] = (old_text, new_centroid, new_count)
-    return clusters
 
-def blend_centroids(c1: "Embedding", c2: "Embedding", n1: int, n2: int) -> "Embedding":
-    """Placeholder for averaging normalized vectors."""
-    ...
+    cohort_hierarchy = ['zipcode', 'city', 'district', 'state', 'country']
 
-# ── DATA ACCESS HELPERS (zipcode-only posts) ──────────────────────────────────
-def fetch_recent_posts_for_zipcode(zipcode: str, since: datetime) -> List["Post"]:
-    """
-    SELECT p.raw_text
-    FROM posts p
-    JOIN users u ON u.user_id = p.user_id
-    WHERE u.pincode = :zipcode AND p.created_at >= :since;
-    """
-    ...
+    for i in range(len(cohort_hierarchy) - 1):
+        lower = cohort_hierarchy[i]
+        higher = cohort_hierarchy[i + 1]
 
-# ── CORE PIPELINE ─────────────────────────────────────────────────────────────
-def run_zipcode_from_posts(now: datetime,
-                           cohort_registry: CohortRegistry,
-                           claim_store: ClaimTallyStore):
-    """
-    1) For each zipcode:
-       • Pull posts in the current time window
-       • Extract claim candidates (keyword → preference/event filter)
-       • Cluster semantically
-       • Upsert clusters into zipcode-level tallies for this window
-    """
-    window_start = claim_store.window_start(now)
-    since = window_start  # strict windowing
+        # For each higher cohort entity (e.g. each city)
+        for higher_id in get_all_cohort_ids(higher):
+            lower_cohorts = get_lower_cohorts(higher, higher_id)  
+            total_users_higher = get_cohort_user_count(higher, higher_id)
 
-    for zipcode in cohort_registry.enumerate_geo_ids("pincode"):
-        posts = fetch_recent_posts_for_zipcode(zipcode, since)
-        sentences = []
-        for post in posts:
-            sentences.extend(extract_claim_candidates(post.raw_text))
-        if not sentences:
-            continue
-        clusters = cluster_claims_semantically(sentences)
-        claim_store.upsert_clusters("pincode", zipcode, window_start, clusters)
+            # Collect all lower-cohort insights for this higher entity
+            candidate_pool = []
+            for lower_id in lower_cohorts:
+                insights = get_recent_insights(lower, lower_id)
+                candidate_pool.extend(insights)
 
-def run_bubble_up_aggregation(now: datetime,
-                              cohort_registry: CohortRegistry,
-                              claim_store: ClaimTallyStore):
-    """
-    For each level > pincode:
-      • Merge clusters from all children cohorts for this window
-      • Semantically aggregate across children (ClaimTallyStore handles or we do it here)
-      • Upsert aggregated clusters at the current level/window
-    """
-    window_start = claim_store.window_start(now)
+            # Cluster semantically
+            clusters = semantic_cluster(candidate_pool)  
 
-    for level in COHORT_LEVELS_ORDER[1:]:
-        for geo_id in cohort_registry.enumerate_geo_ids(level):
-            merged = claim_store.fetch_child_clusters_merged(level, geo_id, window_start)
-            if not merged:
-                continue
-            # merged is already semantically aggregated across children.
-            claim_store.upsert_clusters(level, geo_id, window_start, merged)
+            for cluster_id, entries in clusters.items():
+                unique_users = set(e['user_id'] for e in entries)
+                user_pct = len(unique_users) / total_users_higher
 
-def run_surface_qualified(now: datetime,
-                          cohort_registry: CohortRegistry,
-                          claim_store: ClaimTallyStore,
-                          surfaced_log: SurfacedInsightLog,
-                          out_queue: MessageQueue):
-    """
-    For every cohort level + geo_id:
-      • Pull this window’s clusters
-      • Compute % of REGISTERED users
-      • If >= threshold AND not recently surfaced → push broadcast insight
-    """
-    window_start = claim_store.window_start(now)
-
-    for level in COHORT_LEVELS_ORDER:
-        threshold = THRESHOLDS[level]
-        for geo_id in cohort_registry.enumerate_geo_ids(level):
-            clusters = claim_store.fetch_clusters(level, geo_id, window_start)
-            if not clusters:
-                continue
-
-            registered = cohort_registry.get_registered_count(level, geo_id)
-            if registered <= 0:
-                continue
-
-            for canonical_text, _centroid, count in clusters:
-                pct = count / max(registered, 1)
-                if pct < threshold:
-                    continue
-                if surfaced_log.recently_surfaced(canonical_text, level, geo_id, SURFACE_COOLDOWN_HOURS):
-                    continue
-
-                payload = {
-                    "text": canonical_text,
-                    "cohort": level,
-                    "geo_identifier": geo_id,
-                    "percent": round(pct * 100, 1),
-                    "window_start": window_start.isoformat(),
-                    # No "targets" → frontend renders this in the INSIGHTS slot
-                }
-                out_queue.push_insight(payload)
-                surfaced_log.mark_surfaced(canonical_text, level, geo_id, now)
-
-# ── ENTRYPOINT (called by Celery Beat) ────────────────────────────────────────
-def run_insight_generation_cycle(now: datetime = None):
-    """
-    Single cohesive cycle, idempotent per window:
-      1) Zipcode extraction from posts
-      2) Bubble-up aggregation for higher cohorts
-      3) Surface qualified insights (broadcast)
-    """
-    now = now or datetime.utcnow()
-
-    # Resolve concrete implementations (DB/Redis-backed) via DI/container
-    cohort_registry = resolve_cohort_registry()
-    claim_store = resolve_claim_tally_store()
-    surfaced_log = resolve_surfaced_log()
-    out_queue = resolve_message_queue()
-
-    run_zipcode_from_posts(now, cohort_registry, claim_store)
-    run_bubble_up_aggregation(now, cohort_registry, claim_store)
-    run_surface_qualified(now, cohort_registry, claim_store, surfaced_log, out_queue)
-
-# ─────────────────────────────────────────────────────────────────────────────
-# END pseudocode
-# ─────────────────────────────────────────────────────────────────────────────
+                if user_pct >= GATING_THRESHOLDS[higher]:
+                    insight_text = generate_insight_text(entries)
+                    save_insight({
+                        'cohort_level': higher,
+                        'cohort_id': higher_id,
+                        'text': insight_text,
+                        'user_pct': user_pct
+                    })
+                    publish_message('insights', {
+                        'cohort_level': higher,
+                        'cohort_id': higher_id,
+                        'text': insight_text,
+                        'user_pct': user_pct
+                    })
