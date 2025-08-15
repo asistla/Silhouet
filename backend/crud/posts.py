@@ -8,7 +8,7 @@ from models import Post
 from schemas import PostCreate
 
 # Import the Celery task
-from celery_worker import process_post_sentiment_task # <<< NEW IMPORT
+from workers.celery_worker import process_post_sentiment_task # <<< NEW IMPORT
 
 def create_post(db: Session, post_text: str, user_id: uuid.UUID):
     # 1. Create the post entry in the database

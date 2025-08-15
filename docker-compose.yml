@@ -52,7 +52,7 @@ services:
     build:
       context: .
       dockerfile: ./worker/Dockerfile
-    command: celery -A backend_code.celery_worker worker --loglevel=debug
+    command: celery -A backend_code.workers.celery_worker worker --loglevel=debug
     volumes:
       - ./backend:/app/backend_code
       - ./shared_config:/app/shared_config
