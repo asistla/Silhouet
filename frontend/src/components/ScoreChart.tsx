@@ -1,7 +1,7 @@
 import React from 'react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid,
-    Tooltip, Legend, ResponsiveContainer, LabelList
+    Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import { PERSONALITY_KEYS } from '../config';
 
@@ -11,23 +11,6 @@ interface ScoreChartProps {
     userScores: Scores;
     cohortScores: Scores;
 }
-
-// Custom Tick for Y-Axis to alternate labels
-const AlternatingYAxisTick = (props: any) => {
-    const { x, y, payload, index } = props;
-    const isEven = index % 2 === 0;
-    const tickX = isEven ? x - 15 : x + 15; // Position left or right
-    const anchor = isEven ? 'end' : 'start'; // Anchor text accordingly
-
-    return (
-        <g transform={`translate(${x},${y})`}>
-            <text x={isEven ? -10 : 10} y={0} dy={4} textAnchor={anchor} fill="#e8e4d5" fontSize={12}>
-                {payload.value}
-            </text>
-        </g>
-    );
-};
-
 
 const ScoreChart: React.FC<ScoreChartProps> = ({ userScores, cohortScores }) => {
 
@@ -46,12 +29,13 @@ const ScoreChart: React.FC<ScoreChartProps> = ({ userScores, cohortScores }) => 
                 barCategoryGap="10%"
             >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e8e4d5" opacity={0.1} />
-                <YAxis type="number" domain={[-1, 1]} tick={{ fill: '#e8e4d5' }} />
+                <YAxis type="number" domain={[-0.5, 0.5]} tick={{ fill: '#e8e4d5' }} />
                 <XAxis 
                     type="category" 
                     dataKey="subject" 
                     tickLine={false}
                     axisLine={false}
+                    tick={false}
 //                    tick={<AlternatingYAxisTick />}
                     width={0} // Axis line is not needed, labels are positioned manually
                 />

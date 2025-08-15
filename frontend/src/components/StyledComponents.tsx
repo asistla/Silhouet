@@ -58,8 +58,8 @@ export const MainContainer = styled.div`
   background-color: ${({ theme }) => theme.colors.background};
   color: ${({ theme }) => theme.colors.text};
   font-family: ${({ theme }) => theme.font.family};
-  padding-bottom: 50px; /* Same as ScoreChartContainer height */
   box-sizing: border-box;
+  overflow: hidden; /* Prevents main content from scrolling */
 `;
 
 // Left panel
@@ -102,13 +102,11 @@ export const RightPanel = styled.div`
 `;
 
 export const ScoreChartContainer = styled.div`
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 50px;
-  background-color: rgba(255, 0, 0, 0.3);
-  z-index: 100; /* keep it above panels */
+  height: 250px; /* Increased height for the chart */
+  background-color: ${({ theme }) => theme.colors.panel};
+  border-top: 1px solid ${({ theme }) => theme.colors.borderColor};
+  padding: ${({ theme }) => theme.spacing(2)};
+  box-sizing: border-box;
 `;
 
 // Journal textarea
