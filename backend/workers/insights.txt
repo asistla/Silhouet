@@ -1,0 +1,46 @@
+def store_candidates(zipcode, user_id, candidates):
+    # Append to a Redis list keyed by zipcode
+    pass
+
+def semantic_cluster(sentences):
+    # Use embedding similarity + clustering (e.g. HDBSCAN) to group semantically similar sentences
+    pass
+
+def generate_insight_text(cluster_entries):
+    # Turn clustered sentences into a readable insight:
+    # "X% of users in {cohort} claim: {representative_sentence}"
+    pass
+
+def publish_message(queue_name, message):
+    # Push to Redis queue
+    pass
+
+Data Flow Summary
+
+Post creation → scoring engine
+
+Runs funnel (assertions → remove prefs → remove events).
+
+Produces candidate sentences + metadata.
+
+Sends to insight_worker.store_candidates() keyed by zipcode.
+
+Zipcode-level aggregation (hourly)
+
+Pulls candidates for each zipcode.
+
+Clusters semantically.
+
+Applies zipcode threshold gating.
+
+Saves + publishes qualifying insights.
+
+Bubble-up aggregation (less frequent, e.g. every 3–6 hrs)
+
+Pulls insights from lower cohort.
+
+Clusters + applies higher cohort gating.
+
+Saves + publishes.
+
+Cohort-level gating ensures only sufficiently corroborated insights bubble up — prevents noise from flooding larger cohorts.
