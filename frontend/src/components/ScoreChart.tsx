@@ -43,7 +43,7 @@ const ScoreChart: React.FC<ScoreChartProps> = ({ userScores, cohortScores }) => 
                 data={chartData} 
                 layout="horizontal" 
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                barCategoryGap="30%"
+                barCategoryGap="10%"
             >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e8e4d5" opacity={0.1} />
                 <YAxis type="number" domain={[-1, 1]} tick={{ fill: '#e8e4d5' }} />
@@ -52,7 +52,7 @@ const ScoreChart: React.FC<ScoreChartProps> = ({ userScores, cohortScores }) => 
                     dataKey="subject" 
                     tickLine={false}
                     axisLine={false}
-                    tick={<AlternatingYAxisTick />}
+//                    tick={<AlternatingYAxisTick />}
                     width={0} // Axis line is not needed, labels are positioned manually
                 />
                 <Tooltip

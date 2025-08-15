@@ -62,16 +62,5 @@ export const AdSlot: React.FC<AdSlotProps> = ({ title, content, callToAction, po
       </AdContainer>
     );
   }
-
-  // Fallback to placeholder view
-  return (
-    <div style={{
-      padding: '8px',
-      background: '#EEE',
-      borderRadius: '8px',
-      marginTop: '16px'
-    }}>
-      <p>Sponsored — Ad placeholder ({position || 'general'})</p>
-    </div>
-  );
+return null;
 };

@@ -41,18 +41,25 @@ export const Grid = styled.div`
   gap: ${({ theme }) => theme.spacing(3)};
 `;
 
-
 // ==================================================================
 // Main Application Layout Components
 // ==================================================================
 
-// Main layout container
-export const MainContainer = styled.div`
+export const PageContainer = styled.div`
   display: flex;
+  flex-direction: column;
   height: 100vh;
+  overflow: hidden; /* prevent scrollbars if not needed */
+`;
+
+export const MainContainer = styled.div`
+  flex: 1;
+  display: flex;
   background-color: ${({ theme }) => theme.colors.background};
   color: ${({ theme }) => theme.colors.text};
   font-family: ${({ theme }) => theme.font.family};
+  padding-bottom: 50px; /* Same as ScoreChartContainer height */
+  box-sizing: border-box;
 `;
 
 // Left panel
@@ -72,13 +79,6 @@ export const CenterPanel = styled.div`
   padding: ${({ theme }) => theme.spacing(3)};
   display: flex;
   flex-direction: column;
-`;
-
-// New container for ScoreChart
-export const ScoreChartContainer = styled.div`
-  height: 250px;
-  margin-top: ${({ theme }) => theme.spacing(2)};
-  background-color: rgba(255, 0, 0, 0.3);
 `;
 
 // Right panel
@@ -101,6 +101,16 @@ export const RightPanel = styled.div`
   }
 `;
 
+export const ScoreChartContainer = styled.div`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  background-color: rgba(255, 0, 0, 0.3);
+  z-index: 100; /* keep it above panels */
+`;
+
 // Journal textarea
 export const TextArea = styled.textarea`
   flex-grow: 1;
@@ -111,7 +121,7 @@ export const TextArea = styled.textarea`
   border-radius: 4px;
   padding: ${({ theme }) => theme.spacing(2)};
   font-family: ${({ theme }) => theme.font.family};
- font-size: 1.1rem;
+  font-size: 1.1rem;
   line-height: 1.7;
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
   resize: none;
@@ -183,4 +193,3 @@ export const LogoContainer = styled.div`
     filter: drop-shadow(0 0 5px ${({ theme }) => theme.colors.accent2});
   }
 `;
-
