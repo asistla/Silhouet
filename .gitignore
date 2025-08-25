@@ -58,3 +58,5 @@ frontend/node_modules/
 #misc
 *.swp
 backend/rotating_keys.json
+venv/
+proto/
