@@ -19,7 +19,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 REDIS_BROKER_URL = os.getenv("REDIS_BROKER_URL", "redis://redis:6379/0")
-MODEL_SERVICE_URL = os.getenv("MODEL_SERVICE_URL", "http://model:8001/score")
+MODEL_SERVICE_URL = os.getenv("MODEL_SERVICE_URL", "http://model:8001/process")
+#/score")
 
 # Define the Redis Pub/Sub channel name (must match backend's listener)
 PUBSUB_CHANNEL = "sentiment_updates"

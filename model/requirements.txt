@@ -2,9 +2,8 @@
 fastapi
 sentence-transformers
 transformers==4.44.2
-nltk
-pysbd
 uvicorn[standard]==0.30.6
 torch
 spacy==3.7.4
-
+pysbd
+nltk
