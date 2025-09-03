@@ -1,45 +1,26 @@
 # backend/celery_worker.py
 import os
-from celery import Celery
 import httpx
-from sqlalchemy.orm import Session
 import uuid
 import json
 import redis
 from datetime import datetime
+from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import Post, User
 from crud.users import update_user_scores
-from silhouet_config import PERSONALITY_KEYS
-
 from workers.ads_worker import push_ads_for_campaign
 from workers.insight_worker import push_insight
+from .celery_app import celery_app  # Import the shared app
 
 from dotenv import load_dotenv
 load_dotenv()
 
 REDIS_BROKER_URL = os.getenv("REDIS_BROKER_URL", "redis://redis:6379/0")
 MODEL_SERVICE_URL = os.getenv("MODEL_SERVICE_URL", "http://model:8001/process")
-#/score")
 
 # Define the Redis Pub/Sub channel name (must match backend's listener)
 PUBSUB_CHANNEL = "sentiment_updates"
-
-# Initialize Celery app
-celery_app = Celery(
-    'sentiment_tasks',
-    broker=REDIS_BROKER_URL,
-    backend=REDIS_BROKER_URL
-)
-
-celery_app.conf.update(
-    task_track_started=True,
-    task_serializer='json',
-    accept_content=['json'],
-    result_serializer='json',
-    timezone='UTC',
-    enable_utc=True,
-)
 
 try:
     redis_publisher_client = redis.StrictRedis.from_url(REDIS_BROKER_URL, encoding="utf-8", decode_responses=False)
@@ -65,8 +46,9 @@ def process_post_sentiment_task(post_id: str, raw_text: str):
         response = httpx.post(MODEL_SERVICE_URL, json=({"text": raw_text}))
         response.raise_for_status()
         sentiment_data = json.loads(response.json())
+        
+        # SCORES processing
         returned_scores = sentiment_data.get("scores")
-
         if returned_scores and isinstance(returned_scores, dict):
             db_post.sentiment_scores_json = json.dumps(returned_scores)
             db.add(db_post)
@@ -74,14 +56,12 @@ def process_post_sentiment_task(post_id: str, raw_text: str):
             db.refresh(db_post)
             print(f"Task: Post {post_id}: Sentiment scores saved to post.")
 
-            # --- UPDATE USER SCORES ---
             db_user = db.query(User).filter(User.user_id == db_post.user_id).first()
             if db_user:
                 update_user_scores(db, user=db_user, new_scores=returned_scores)
                 print(f"Task: User {db_user.user_id}: Average scores updated.")
             else:
                 print(f"Task: User not found for post {post_id}. Cannot update scores.")
-            # --- END UPDATE ---
 
             if redis_publisher_client:
                 try:
@@ -102,6 +82,15 @@ def process_post_sentiment_task(post_id: str, raw_text: str):
         else:
             print(f"Task: Post {post_id}: Invalid sentiment scores received from model: {sentiment_data}")
 
+        # CLAIMS processing
+        returned_claims = sentiment_data.get("claims")
+        if returned_claims and isinstance(returned_claims, list):
+            # Asynchronously trigger the insight worker task
+            push_insight.delay(claims=returned_claims)
+            print(f"Task: Post {post_id}: Enqueued {len(returned_claims)} claims for insight processing.")
+        else:
+            print(f"Task: Post {post_id}: No claims received or claims format is invalid.")
+
     except httpx.RequestError as exc:
         print(f"Task: Post {post_id}: An error occurred while requesting model service: {exc}")
     except httpx.HTTPStatusError as exc:
@@ -113,26 +102,11 @@ def process_post_sentiment_task(post_id: str, raw_text: str):
             db.close()
 
 #=====================
-#ads/insights pipeline
+#ads pipeline
 #=====================
 
 @celery_app.task(name="push_ads")
 def push_ads_task():
-    push_ads_to_queue()
-
-@celery_app.task(name="push_insights")
-def push_insights_task():
-    push_insights_to_queue()
-
-# Beat schedule (merged into existing config)
-celery_app.conf.beat_schedule = getattr(celery_app.conf, "beat_schedule", {})
-celery_app.conf.beat_schedule.update({
-    "push_ads_every_minute": {
-        "task": "push_ads",
-        "schedule": 60.0,  # every 1 min (MVP)
-    },
-    "push_insights_every_two_minutes": {
-        "task": "push_insights",
-        "schedule": 120.0,  # every 2 min (MVP)
-    },
-})
+    # This should be implemented in ads_worker.py, just calling it from here.
+    # For now, assuming push_ads_for_campaign is the entry point.
+    push_ads_for_campaign()

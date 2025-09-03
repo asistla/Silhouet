@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir \
 # Download SpaCy model
 RUN python -m spacy download en_core_web_trf
 # NLTK data is needed for simplify_sentences.py
-RUN python -c "import nltk; nltk.download('punkt')"
+RUN python -c "import nltk; nltk.download('punkt_tab')"
 
 # Create directory for local models
 RUN mkdir -p /models
