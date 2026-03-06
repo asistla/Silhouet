@@ -1,0 +1,375 @@
+time="2025-09-03T23:05:55+05:30" level=warning msg="/home/burgerbob/dev/IntelligentDesignCompany/antisocial/Silhouet/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+silhouet-backend  | Keys file not found at /keys/rotating_keys.json. Initializing keys...
+silhouet-backend  | Initializing 3 new secret keys...
+silhouet-backend  | Successfully created /keys/rotating_keys.json with 3 keys.
+silhouet-backend  | INFO:     Started server process [1]
+silhouet-backend  | INFO:     Waiting for application startup.
+frontend-1        | /docker-entrypoint.sh: /docker-entrypoint.d/ is not empty, will attempt to perform configuration
+frontend-1        | /docker-entrypoint.sh: Looking for shell scripts in /docker-entrypoint.d/
+frontend-1        | /docker-entrypoint.sh: Launching /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh
+frontend-1        | 10-listen-on-ipv6-by-default.sh: info: Getting the checksum of /etc/nginx/conf.d/default.conf
+frontend-1        | 10-listen-on-ipv6-by-default.sh: info: Enabled listen on IPv6 in /etc/nginx/conf.d/default.conf
+frontend-1        | /docker-entrypoint.sh: Sourcing /docker-entrypoint.d/15-local-resolvers.envsh
+frontend-1        | /docker-entrypoint.sh: Launching /docker-entrypoint.d/20-envsubst-on-templates.sh
+frontend-1        | /docker-entrypoint.sh: Launching /docker-entrypoint.d/30-tune-worker-processes.sh
+frontend-1        | /docker-entrypoint.sh: Configuration complete; ready for start up
+worker-1          | /usr/local/lib/python3.10/site-packages/celery/platforms.py:841: SecurityWarning: You're running the worker with superuser privileges: this is
+worker-1          | absolutely not recommended!
+worker-1          | 
+worker-1          | Please specify a different user using the --uid option.
+db-1              | The files belonging to this database system will be owned by user "postgres".
+db-1              | This user must also own the server process.
+db-1              | 
+db-1              | The database cluster will be initialized with locale "en_US.utf8".
+db-1              | The default database encoding has accordingly been set to "UTF8".
+db-1              | The default text search configuration will be set to "english".
+db-1              | 
+db-1              | Data page checksums are disabled.
+db-1              | 
+db-1              | fixing permissions on existing directory /var/lib/postgresql/data ... ok
+db-1              | creating subdirectories ... ok
+db-1              | selecting dynamic shared memory implementation ... posix
+db-1              | selecting default max_connections ... 100
+db-1              | selecting default shared_buffers ... 128MB
+db-1              | selecting default time zone ... UTC
+db-1              | creating configuration files ... ok
+db-1              | running bootstrap script ... ok
+db-1              | sh: locale: not found
+worker-1          | 
+model-1           | The cache for model files in Transformers v4.22.0 has been updated. Migrating your old cache. This is a one-time only operation. You can interrupt this and resume the migration later on by calling `transformers.utils.move_cache()`.
+worker-1          | User information: uid=0 euid=0 gid=0 egid=0
+model-1           | 0it [00:00, ?it/s]0it [00:00, ?it/s]
+worker-1          | 
+worker-1          |   warnings.warn(SecurityWarning(ROOT_DISCOURAGED.format(
+db-1              | 2025-09-03 17:35:46.437 UTC [35] WARNING:  no usable system locales were found
+worker-1          | [2025-09-03 17:35:49,437: DEBUG/MainProcess] | Worker: Preparing bootsteps.
+worker-1          | [2025-09-03 17:35:49,439: DEBUG/MainProcess] | Worker: Building graph...
+worker-1          | [2025-09-03 17:35:49,439: DEBUG/MainProcess] | Worker: New boot order: {StateDB, Beat, Timer, Hub, Pool, Autoscaler, Consumer}
+worker-1          | [2025-09-03 17:35:49,515: DEBUG/MainProcess] | Consumer: Preparing bootsteps.
+worker-1          | [2025-09-03 17:35:49,516: DEBUG/MainProcess] | Consumer: Building graph...
+worker-1          | [2025-09-03 17:35:49,523: DEBUG/MainProcess] | Consumer: New boot order: {Connection, Events, Mingle, Tasks, Control, DelayedDelivery, Agent, Gossip, Heart, event loop}
+worker-1          | Celery Worker: Redis publisher client initialized and connected.
+worker-1          |  
+worker-1          |  -------------- celery@791254629d4a v5.5.3 (immunity)
+worker-1          | --- ***** ----- 
+worker-1          | -- ******* ---- Linux-6.8.0-65-generic-x86_64-with 2025-09-03 17:35:49
+worker-1          | - *** --- * --- 
+db-1              | performing post-bootstrap initialization ... ok
+db-1              | syncing data to disk ... ok
+db-1              | 
+db-1              | 
+worker-1          | - ** ---------- [config]
+db-1              | Success. You can now start the database server using:
+db-1              | 
+db-1              |     pg_ctl -D /var/lib/postgresql/data -l logfile start
+db-1              | 
+db-1              | initdb: warning: enabling "trust" authentication for local connections
+db-1              | initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+db-1              | waiting for server to start....2025-09-03 17:35:53.556 UTC [41] LOG:  starting PostgreSQL 16.10 on x86_64-pc-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit
+db-1              | 2025-09-03 17:35:53.566 UTC [41] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+db-1              | 2025-09-03 17:35:53.614 UTC [44] LOG:  database system was shut down at 2025-09-03 17:35:46 UTC
+db-1              | 2025-09-03 17:35:53.631 UTC [41] LOG:  database system is ready to accept connections
+worker-1          | - ** ---------- .> app:         silhouet_tasks:0x78b272a29750
+db-1              |  done
+db-1              | server started
+db-1              | CREATE DATABASE
+db-1              | 
+db-1              | 
+db-1              | /usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
+db-1              | 
+redis-1           | 1:C 03 Sep 2025 17:35:45.937 # WARNING Memory overcommit must be enabled! Without it, a background save or replication may fail under low memory condition. Being disabled, it can also cause failures without low memory condition, see https://github.com/jemalloc/jemalloc/issues/1328. To fix this issue add 'vm.overcommit_memory = 1' to /etc/sysctl.conf and then reboot or run the command 'sysctl vm.overcommit_memory=1' for this to take effect.
+db-1              | waiting for server to shut down...2025-09-03 17:35:53.951 UTC [41] LOG:  received fast shutdown request
+redis-1           | 1:C 03 Sep 2025 17:35:45.937 * oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+redis-1           | 1:C 03 Sep 2025 17:35:45.937 * Redis version=7.4.5, bits=64, commit=00000000, modified=0, pid=1, just started
+db-1              | .2025-09-03 17:35:53.966 UTC [41] LOG:  aborting any active transactions
+redis-1           | 1:C 03 Sep 2025 17:35:45.937 # Warning: no config file specified, using the default config. In order to specify a config file use redis-server /path/to/redis.conf
+worker-1          | - ** ---------- .> transport:   redis://redis:6379/0
+redis-1           | 1:M 03 Sep 2025 17:35:45.938 * monotonic clock: POSIX clock_gettime
+worker-1          | - ** ---------- .> results:     redis://redis:6379/0
+redis-1           | 1:M 03 Sep 2025 17:35:45.938 * Running mode=standalone, port=6379.
+db-1              | 2025-09-03 17:35:53.968 UTC [41] LOG:  background worker "logical replication launcher" (PID 47) exited with exit code 1
+redis-1           | 1:M 03 Sep 2025 17:35:45.939 * Server initialized
+db-1              | 2025-09-03 17:35:53.968 UTC [42] LOG:  shutting down
+redis-1           | 1:M 03 Sep 2025 17:35:45.939 * Ready to accept connections tcp
+db-1              | 2025-09-03 17:35:53.982 UTC [42] LOG:  checkpoint starting: shutdown immediate
+worker-1          | - *** --- * --- .> concurrency: 8 (prefork)
+worker-1          | -- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+worker-1          | --- ***** ----- 
+worker-1          |  -------------- [queues]
+worker-1          |                 .> celery           exchange=celery(direct) key=celery
+worker-1          |                 
+worker-1          | 
+worker-1          | [tasks]
+worker-1          |   . backend_code.workers.insight_worker.push_insight
+worker-1          |   . celery.accumulate
+worker-1          |   . celery.backend_cleanup
+worker-1          |   . celery.chain
+worker-1          |   . celery.chord
+worker-1          |   . celery.chord_unlock
+worker-1          |   . celery.chunks
+worker-1          |   . celery.group
+worker-1          |   . celery.map
+worker-1          |   . celery.starmap
+worker-1          |   . process_post_sentiment
+worker-1          |   . push_ads
+worker-1          |   . workers.ads_worker.push_ads_for_campaign
+worker-1          |   . workers.insight_worker.push_insight
+worker-1          | 
+worker-1          | [2025-09-03 17:35:49,530: DEBUG/MainProcess] | Worker: Starting Beat
+worker-1          | [2025-09-03 17:35:49,532: DEBUG/MainProcess] ^-- substep ok
+worker-1          | [2025-09-03 17:35:49,532: DEBUG/MainProcess] | Worker: Starting Hub
+worker-1          | [2025-09-03 17:35:49,532: DEBUG/MainProcess] ^-- substep ok
+worker-1          | [2025-09-03 17:35:49,533: DEBUG/MainProcess] | Worker: Starting Pool
+worker-1          | [2025-09-03 17:35:49,881: DEBUG/MainProcess] ^-- substep ok
+worker-1          | [2025-09-03 17:35:49,881: DEBUG/MainProcess] | Worker: Starting Consumer
+worker-1          | [2025-09-03 17:35:49,881: DEBUG/MainProcess] | Consumer: Starting Connection
+worker-1          | [2025-09-03 17:35:49,889: INFO/MainProcess] Connected to redis://redis:6379/0
+worker-1          | [2025-09-03 17:35:49,889: DEBUG/MainProcess] ^-- substep ok
+worker-1          | [2025-09-03 17:35:49,889: DEBUG/MainProcess] | Consumer: Starting Events
+worker-1          | [2025-09-03 17:35:49,891: DEBUG/MainProcess] ^-- substep ok
+worker-1          | [2025-09-03 17:35:49,891: DEBUG/MainProcess] | Consumer: Starting Mingle
+worker-1          | [2025-09-03 17:35:49,892: INFO/MainProcess] mingle: searching for neighbors
+worker-1          | [2025-09-03 17:35:50,900: INFO/MainProcess] mingle: all alone
+worker-1          | [2025-09-03 17:35:50,900: DEBUG/MainProcess] ^-- substep ok
+worker-1          | [2025-09-03 17:35:50,900: DEBUG/MainProcess] | Consumer: Starting Tasks
+worker-1          | [2025-09-03 17:35:50,903: DEBUG/MainProcess] ^-- substep ok
+worker-1          | [2025-09-03 17:35:50,904: DEBUG/MainProcess] | Consumer: Starting Control
+worker-1          | [2025-09-03 17:35:50,907: DEBUG/MainProcess] ^-- substep ok
+worker-1          | [2025-09-03 17:35:50,907: DEBUG/MainProcess] | Consumer: Starting Gossip
+worker-1          | [2025-09-03 17:35:50,911: DEBUG/MainProcess] ^-- substep ok
+worker-1          | [2025-09-03 17:35:50,911: DEBUG/MainProcess] | Consumer: Starting Heart
+worker-1          | [2025-09-03 17:35:50,913: DEBUG/MainProcess] ^-- substep ok
+worker-1          | [2025-09-03 17:35:50,913: DEBUG/MainProcess] | Consumer: Starting event loop
+worker-1          | [2025-09-03 17:35:50,913: DEBUG/MainProcess] | Worker: Hub.register Pool...
+worker-1          | [2025-09-03 17:35:50,913: INFO/MainProcess] celery@791254629d4a ready.
+worker-1          | [2025-09-03 17:35:50,914: DEBUG/MainProcess] basic.qos: prefetch_count->32
+worker-1          | [2025-09-03 17:35:51,115: INFO/Beat] beat: Starting...
+worker-1          | [2025-09-03 17:35:52,413: DEBUG/Beat] Current schedule:
+worker-1          | 
+worker-1          | [2025-09-03 17:35:52,413: DEBUG/Beat] beat: Ticking with max interval->5.00 minutes
+worker-1          | [2025-09-03 17:35:52,414: DEBUG/Beat] beat: Waking up in 5.00 minutes.
+db-1              | .2025-09-03 17:35:55.459 UTC [42] LOG:  checkpoint complete: wrote 926 buffers (5.7%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.743 s, sync=0.691 s, total=1.492 s; sync files=301, longest=0.377 s, average=0.003 s; distance=4272 kB, estimate=4272 kB; lsn=0/191E928, redo lsn=0/191E928
+db-1              | 2025-09-03 17:35:55.466 UTC [41] LOG:  database system is shut down
+db-1              |  done
+db-1              | server stopped
+db-1              | 
+db-1              | PostgreSQL init process complete; ready for start up.
+db-1              | 
+db-1              | 2025-09-03 17:35:55.588 UTC [1] LOG:  starting PostgreSQL 16.10 on x86_64-pc-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit
+db-1              | 2025-09-03 17:35:55.588 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+db-1              | 2025-09-03 17:35:55.588 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+db-1              | 2025-09-03 17:35:55.603 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+db-1              | 2025-09-03 17:35:55.620 UTC [57] LOG:  database system was shut down at 2025-09-03 17:35:55 UTC
+db-1              | 2025-09-03 17:35:55.631 UTC [1] LOG:  database system is ready to accept connections
+silhouet-backend  | INFO:     Application startup complete.
+silhouet-backend  | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+silhouet-backend  | Celery Worker: Redis publisher client initialized and connected.
+silhouet-backend  | DB connection failed: (psycopg2.OperationalError) connection to server at "db" (172.18.0.3), port 5432 failed: Connection refused
+silhouet-backend  | 	Is the server running on that host and accepting TCP/IP connections?
+silhouet-backend  | 
+silhouet-backend  | (Background on this error at: https://sqlalche.me/e/20/e3q8), retrying...
+silhouet-backend  | DB connection failed: (psycopg2.OperationalError) connection to server at "db" (172.18.0.3), port 5432 failed: Connection refused
+silhouet-backend  | 	Is the server running on that host and accepting TCP/IP connections?
+silhouet-backend  | 
+silhouet-backend  | (Background on this error at: https://sqlalche.me/e/20/e3q8), retrying...
+silhouet-backend  | Database tables ensured.
+silhouet-backend  | Redis client connected.
+silhouet-backend  | INFO:     172.18.0.8:53412 - "POST /auth/challenge HTTP/1.0" 404 Not Found
+frontend-1        | 192.168.1.7 - - [03/Sep/2025:17:36:09 +0000] "POST /api/auth/challenge HTTP/1.1" 404 27 "http://192.168.1.30:3000/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0"
+silhouet-backend  | INFO:     172.18.0.8:42508 - "POST /users/ HTTP/1.0" 201 Created
+frontend-1        | 192.168.1.7 - - [03/Sep/2025:17:36:24 +0000] "POST /api/users/ HTTP/1.1" 201 153 "http://192.168.1.30:3000/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0"
+silhouet-backend  | INFO:     172.18.0.8:42524 - "POST /auth/challenge HTTP/1.0" 200 OK
+frontend-1        | 192.168.1.7 - - [03/Sep/2025:17:36:27 +0000] "POST /api/auth/challenge HTTP/1.1" 200 80 "http://192.168.1.30:3000/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0"
+silhouet-backend  | INFO:     172.18.0.8:42538 - "POST /users/login HTTP/1.0" 200 OK
+frontend-1        | 192.168.1.7 - - [03/Sep/2025:17:36:27 +0000] "POST /api/users/login HTTP/1.1" 200 326 "http://192.168.1.30:3000/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0"
+silhouet-backend  | INFO:     172.18.0.8:42544 - "GET /scores/me HTTP/1.0" 200 OK
+frontend-1        | 192.168.1.7 - - [03/Sep/2025:17:36:27 +0000] "GET /api/scores/me HTTP/1.1" 200 2055 "http://192.168.1.30:3000/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0"
+silhouet-backend  | Post ce535f52-3e88-495b-9c99-6973a6aa051b: Sentiment analysis task enqueued for user 799b1a8d-d51f-4414-a6e0-2506b5ebb6aa.
+silhouet-backend  | INFO:     172.18.0.8:42552 - "POST /posts/ HTTP/1.0" 201 Created
+frontend-1        | 192.168.1.7 - - [03/Sep/2025:17:36:31 +0000] "POST /api/posts/ HTTP/1.1" 201 1654 "http://192.168.1.30:3000/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0"
+worker-1          | [2025-09-03 17:36:31,742: INFO/MainProcess] Task process_post_sentiment[1b3ef276-193a-4929-9ef7-3eef3e603fc3] received
+worker-1          | [2025-09-03 17:36:31,742: DEBUG/MainProcess] TaskPool: Apply <function fast_trace_task at 0x78b2729f9ea0> (args:('process_post_sentiment', '1b3ef276-193a-4929-9ef7-3eef3e603fc3', {'lang': 'py', 'task': 'process_post_sentiment', 'id': '1b3ef276-193a-4929-9ef7-3eef3e603fc3', 'shadow': None, 'eta': None, 'expires': None, 'group': None, 'group_index': None, 'retries': 0, 'timelimit': [None, None], 'root_id': '1b3ef276-193a-4929-9ef7-3eef3e603fc3', 'parent_id': None, 'argsrepr': "('ce535f52-3e88-495b-9c99-6973a6aa051b', 'I can address atleast a couple of those points - great points btw. \n\n1. the alkaline environment: materials are not alkaline on their own - there needs to be water for the OH- ions to exist. Dry concrete has no pH, it only has one once it\\'s wet. In this case, as long as it is impervious to water once set (which i believe it is), there\\'s no alkaline environment to worry about. \n2. The mix ratios will definitely need experiment. What I\\'m satisfied with is the control; I can control the fiber dimensions and aspect ratio, the water percentage, and the mix ratio, meaning I have a wide range to play in.... kwargs:{})
+worker-1          | [2025-09-03 17:36:31,745: WARNING/ForkPoolWorker-8] Task: Processing sentiment for Post ID: ce535f52-3e88-495b-9c99-6973a6aa051b
+worker-1          | [2025-09-03 17:36:31,871: DEBUG/ForkPoolWorker-8] connect_tcp.started host='model' port=8001 local_address=None timeout=5.0 socket_options=None
+worker-1          | [2025-09-03 17:36:31,872: DEBUG/ForkPoolWorker-8] connect_tcp.failed exception=ConnectError(ConnectionRefusedError(111, 'Connection refused'))
+worker-1          | [2025-09-03 17:36:31,872: WARNING/ForkPoolWorker-8] Task: Post ce535f52-3e88-495b-9c99-6973a6aa051b: An error occurred while requesting model service: [Errno 111] Connection refused
+worker-1          | [2025-09-03 17:36:31,875: INFO/ForkPoolWorker-8] Task process_post_sentiment[1b3ef276-193a-4929-9ef7-3eef3e603fc3] succeeded in 0.1319087559968466s: None
+silhouet-backend  | INFO:     172.18.0.8:50016 - "GET /scores/me HTTP/1.0" 200 OK
+frontend-1        | 192.168.1.7 - - [03/Sep/2025:17:36:33 +0000] "GET /api/scores/me HTTP/1.1" 200 2055 "http://192.168.1.30:3000/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0"
+model-1           | /opt/conda/lib/python3.10/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+model-1           |   warnings.warn(
+model-1           | INFO:     Started server process [1]
+model-1           | INFO:     Waiting for application startup.
+model-1           | INFO:     Application startup complete.
+model-1           | INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+silhouet-backend  | Post a230cbef-8281-42b4-977b-cbc173a5a37d: Sentiment analysis task enqueued for user 799b1a8d-d51f-4414-a6e0-2506b5ebb6aa.
+silhouet-backend  | INFO:     172.18.0.8:48102 - "POST /posts/ HTTP/1.0" 201 Created
+frontend-1        | 192.168.1.7 - - [03/Sep/2025:17:37:00 +0000] "POST /api/posts/ HTTP/1.1" 201 1654 "http://192.168.1.30:3000/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0"
+worker-1          | [2025-09-03 17:37:00,743: INFO/MainProcess] Task process_post_sentiment[a03df0d7-e59f-4246-a799-d5fcce5d7148] received
+worker-1          | [2025-09-03 17:37:00,743: DEBUG/MainProcess] TaskPool: Apply <function fast_trace_task at 0x78b2729f9ea0> (args:('process_post_sentiment', 'a03df0d7-e59f-4246-a799-d5fcce5d7148', {'lang': 'py', 'task': 'process_post_sentiment', 'id': 'a03df0d7-e59f-4246-a799-d5fcce5d7148', 'shadow': None, 'eta': None, 'expires': None, 'group': None, 'group_index': None, 'retries': 0, 'timelimit': [None, None], 'root_id': 'a03df0d7-e59f-4246-a799-d5fcce5d7148', 'parent_id': None, 'argsrepr': "('a230cbef-8281-42b4-977b-cbc173a5a37d', 'I can address atleast a couple of those points - great points btw. \n\n1. the alkaline environment: materials are not alkaline on their own - there needs to be water for the OH- ions to exist. Dry concrete has no pH, it only has one once it\\'s wet. In this case, as long as it is impervious to water once set (which i believe it is), there\\'s no alkaline environment to worry about. \n2. The mix ratios will definitely need experiment. What I\\'m satisfied with is the control; I can control the fiber dimensions and aspect ratio, the water percentage, and the mix ratio, meaning I have a wide range to play in.... kwargs:{})
+worker-1          | [2025-09-03 17:37:00,745: WARNING/ForkPoolWorker-8] Task: Processing sentiment for Post ID: a230cbef-8281-42b4-977b-cbc173a5a37d
+worker-1          | [2025-09-03 17:37:00,758: DEBUG/ForkPoolWorker-8] connect_tcp.started host='model' port=8001 local_address=None timeout=5.0 socket_options=None
+worker-1          | [2025-09-03 17:37:00,759: DEBUG/ForkPoolWorker-8] connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x78b26f04c0d0>
+worker-1          | [2025-09-03 17:37:00,759: DEBUG/ForkPoolWorker-8] send_request_headers.started request=<Request [b'POST']>
+worker-1          | [2025-09-03 17:37:00,759: DEBUG/ForkPoolWorker-8] send_request_headers.complete
+worker-1          | [2025-09-03 17:37:00,759: DEBUG/ForkPoolWorker-8] send_request_body.started request=<Request [b'POST']>
+worker-1          | [2025-09-03 17:37:00,760: DEBUG/ForkPoolWorker-8] send_request_body.complete
+worker-1          | [2025-09-03 17:37:00,760: DEBUG/ForkPoolWorker-8] receive_response_headers.started request=<Request [b'POST']>
+silhouet-backend  | INFO:     172.18.0.8:48104 - "GET /scores/me HTTP/1.0" 200 OK
+frontend-1        | 192.168.1.7 - - [03/Sep/2025:17:37:02 +0000] "GET /api/scores/me HTTP/1.1" 200 2055 "http://192.168.1.30:3000/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0"
+model-1           | Asking to truncate to max_length but no maximum length is provided and the model has no predefined maximum length. Default to no truncation.
+worker-1          | [2025-09-03 17:37:05,765: DEBUG/ForkPoolWorker-8] receive_response_headers.failed exception=ReadTimeout(TimeoutError('timed out'))
+worker-1          | [2025-09-03 17:37:05,765: DEBUG/ForkPoolWorker-8] response_closed.started
+worker-1          | [2025-09-03 17:37:05,765: DEBUG/ForkPoolWorker-8] response_closed.complete
+worker-1          | [2025-09-03 17:37:05,765: WARNING/ForkPoolWorker-8] Task: Post a230cbef-8281-42b4-977b-cbc173a5a37d: An error occurred while requesting model service: timed out
+worker-1          | [2025-09-03 17:37:05,767: INFO/ForkPoolWorker-8] Task process_post_sentiment[a03df0d7-e59f-4246-a799-d5fcce5d7148] succeeded in 5.023311210003158s: None
+silhouet-backend  | Post c575688a-8872-448a-ab7d-a375c9c1ed5e: Sentiment analysis task enqueued for user 799b1a8d-d51f-4414-a6e0-2506b5ebb6aa.
+worker-1          | [2025-09-03 17:37:43,536: INFO/MainProcess] Task process_post_sentiment[e940d5fc-8c34-44e3-bb0e-0d66b3a0bdbb] received
+silhouet-backend  | INFO:     172.18.0.8:35502 - "POST /posts/ HTTP/1.0" 201 Created
+worker-1          | [2025-09-03 17:37:43,536: DEBUG/MainProcess] TaskPool: Apply <function fast_trace_task at 0x78b2729f9ea0> (args:('process_post_sentiment', 'e940d5fc-8c34-44e3-bb0e-0d66b3a0bdbb', {'lang': 'py', 'task': 'process_post_sentiment', 'id': 'e940d5fc-8c34-44e3-bb0e-0d66b3a0bdbb', 'shadow': None, 'eta': None, 'expires': None, 'group': None, 'group_index': None, 'retries': 0, 'timelimit': [None, None], 'root_id': 'e940d5fc-8c34-44e3-bb0e-0d66b3a0bdbb', 'parent_id': None, 'argsrepr': "('c575688a-8872-448a-ab7d-a375c9c1ed5e', 'I can address atleast a couple of those points - great points btw. \n\n1. the alkaline environment: materials are not alkaline on their own - there needs to be water for the OH- ions to exist. Dry concrete has no pH, it only has one once it\\'s wet. In this case, as long as it is impervious to water once set (which i believe it is), there\\'s no alkaline environment to worry about. \n2. The mix ratios will definitely need experiment. What I\\'m satisfied with is the control; I can control the fiber dimensions and aspect ratio, the water percentage, and the mix ratio, meaning I have a wide range to play in.... kwargs:{})
+frontend-1        | 192.168.1.7 - - [03/Sep/2025:17:37:43 +0000] "POST /api/posts/ HTTP/1.1" 201 1654 "http://192.168.1.30:3000/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0"
+worker-1          | [2025-09-03 17:37:43,539: WARNING/ForkPoolWorker-8] Task: Processing sentiment for Post ID: c575688a-8872-448a-ab7d-a375c9c1ed5e
+worker-1          | [2025-09-03 17:37:43,568: DEBUG/ForkPoolWorker-8] connect_tcp.started host='model' port=8001 local_address=None timeout=5.0 socket_options=None
+worker-1          | [2025-09-03 17:37:43,569: DEBUG/ForkPoolWorker-8] connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x78b26f058100>
+worker-1          | [2025-09-03 17:37:43,569: DEBUG/ForkPoolWorker-8] send_request_headers.started request=<Request [b'POST']>
+worker-1          | [2025-09-03 17:37:43,570: DEBUG/ForkPoolWorker-8] send_request_headers.complete
+worker-1          | [2025-09-03 17:37:43,570: DEBUG/ForkPoolWorker-8] send_request_body.started request=<Request [b'POST']>
+worker-1          | [2025-09-03 17:37:43,570: DEBUG/ForkPoolWorker-8] send_request_body.complete
+worker-1          | [2025-09-03 17:37:43,570: DEBUG/ForkPoolWorker-8] receive_response_headers.started request=<Request [b'POST']>
+model-1           | Using device: cuda
+model-1           | [Processing] Full text: I can address atleast a couple of those points - great points btw. 
+model-1           | 
+model-1           | 1. the alka...
+model-1           | INFO:     172.18.0.6:59756 - "POST /process HTTP/1.1" 200 OK
+silhouet-backend  | INFO:     172.18.0.8:37482 - "GET /scores/me HTTP/1.0" 200 OK
+frontend-1        | 192.168.1.7 - - [03/Sep/2025:17:37:45 +0000] "GET /api/scores/me HTTP/1.1" 200 2055 "http://192.168.1.30:3000/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0"
+model-1           | [Processing] Full text: I can address atleast a couple of those points - great points btw. 
+model-1           | 
+model-1           | 1. the alka...
+model-1           | INFO:     172.18.0.6:41784 - "POST /process HTTP/1.1" 200 OK
+worker-1          | [2025-09-03 17:37:48,491: DEBUG/ForkPoolWorker-8] receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Wed, 03 Sep 2025 17:37:00 GMT'), (b'server', b'uvicorn'), (b'content-length', b'5265'), (b'content-type', b'application/json')])
+worker-1          | [2025-09-03 17:37:48,492: INFO/ForkPoolWorker-8] HTTP Request: POST http://model:8001/process "HTTP/1.1 200 OK"
+worker-1          | [2025-09-03 17:37:48,493: DEBUG/ForkPoolWorker-8] receive_response_body.started request=<Request [b'POST']>
+worker-1          | [2025-09-03 17:37:48,493: DEBUG/ForkPoolWorker-8] receive_response_body.complete
+worker-1          | [2025-09-03 17:37:48,493: DEBUG/ForkPoolWorker-8] response_closed.started
+worker-1          | [2025-09-03 17:37:48,493: DEBUG/ForkPoolWorker-8] response_closed.complete
+worker-1          | [2025-09-03 17:37:48,493: DEBUG/ForkPoolWorker-8] close.started
+worker-1          | [2025-09-03 17:37:48,493: DEBUG/ForkPoolWorker-8] close.complete
+worker-1          | [2025-09-03 17:37:48,800: WARNING/ForkPoolWorker-8] Task: Post c575688a-8872-448a-ab7d-a375c9c1ed5e: Sentiment scores saved to post.
+worker-1          | [2025-09-03 17:37:48,820: WARNING/ForkPoolWorker-8] Task: User 799b1a8d-d51f-4414-a6e0-2506b5ebb6aa: Average scores updated.
+worker-1          | [2025-09-03 17:37:48,823: WARNING/ForkPoolWorker-8] Task: Published sentiment update for post c575688a-8872-448a-ab7d-a375c9c1ed5e to Redis channel 'sentiment_updates'.
+worker-1          | [2025-09-03 17:37:48,823: DEBUG/ForkPoolWorker-8] 
+worker-1          | def push_insight(claims):
+worker-1          |     return 1
+worker-1          | 
+worker-1          | [2025-09-03 17:37:48,835: WARNING/ForkPoolWorker-8] Task: Post c575688a-8872-448a-ab7d-a375c9c1ed5e: Enqueued 11 claims for insight processing.
+worker-1          | [2025-09-03 17:37:48,836: INFO/MainProcess] Task workers.insight_worker.push_insight[c3dd4527-ffaa-4ceb-90e6-d7acea033a6a] received
+worker-1          | [2025-09-03 17:37:48,836: INFO/ForkPoolWorker-8] Task process_post_sentiment[e940d5fc-8c34-44e3-bb0e-0d66b3a0bdbb] succeeded in 5.2986778679987765s: None
+worker-1          | [2025-09-03 17:37:48,836: DEBUG/MainProcess] TaskPool: Apply <function fast_trace_task at 0x78b2729f9ea0> (args:('workers.insight_worker.push_insight', 'c3dd4527-ffaa-4ceb-90e6-d7acea033a6a', {'lang': 'py', 'task': 'workers.insight_worker.push_insight', 'id': 'c3dd4527-ffaa-4ceb-90e6-d7acea033a6a', 'shadow': None, 'eta': None, 'expires': None, 'group': None, 'group_index': None, 'retries': 0, 'timelimit': [None, None], 'root_id': 'e940d5fc-8c34-44e3-bb0e-0d66b3a0bdbb', 'parent_id': 'e940d5fc-8c34-44e3-bb0e-0d66b3a0bdbb', 'argsrepr': '()', 'kwargsrepr': "{'claims': [{'sentence': 'I can address atleast a couple of those points - great points btw.', 'claimbuster_scores': [...]}, {'sentence': '1. the alkaline environment: materials are not alkaline on their own - there needs to be water for the OH- ions to exist.', 'claimbuster_scores': [...]}, {'sentence': 'In this case, as long as it is impervious to water once set (which i believe it is), there\\'s no alkaline environment to worry about.', 'claimbuster_scores': [...]}, {'sentence': '2. The mix ratios will definitely need experiment.', 'claimbuster_scores': [...]},... kwargs:{})
+worker-1          | [2025-09-03 17:37:48,861: WARNING/ForkPoolWorker-8] [insight_worker] Broadcasted 11 insights to 1 users.
+worker-1          | [2025-09-03 17:37:48,862: INFO/ForkPoolWorker-8] Task workers.insight_worker.push_insight[c3dd4527-ffaa-4ceb-90e6-d7acea033a6a] succeeded in 0.025068522001674864s: None
+worker-1          | [2025-09-03 17:40:52,438: DEBUG/Beat] beat: Synchronizing schedule...
+worker-1          | [2025-09-03 17:40:53,183: DEBUG/Beat] beat: Waking up in 5.00 minutes.
+db-1              | 2025-09-03 17:40:55.720 UTC [55] LOG:  checkpoint starting: time
+silhouet-backend  | INFO:     172.18.0.8:40774 - "POST /auth/challenge HTTP/1.0" 200 OK
+frontend-1        | 192.168.1.7 - - [03/Sep/2025:17:41:05 +0000] "POST /api/auth/challenge HTTP/1.1" 200 80 "http://192.168.1.30:3000/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0"
+silhouet-backend  | INFO:     172.18.0.8:40778 - "POST /users/login HTTP/1.0" 200 OK
+frontend-1        | 192.168.1.7 - - [03/Sep/2025:17:41:05 +0000] "POST /api/users/login HTTP/1.1" 200 326 "http://192.168.1.30:3000/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0"
+silhouet-backend  | INFO:     172.18.0.8:40786 - "GET /scores/me HTTP/1.0" 200 OK
+frontend-1        | 192.168.1.7 - - [03/Sep/2025:17:41:06 +0000] "GET /api/scores/me HTTP/1.1" 200 2905 "http://192.168.1.30:3000/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0"
+db-1              | 2025-09-03 17:41:13.741 UTC [55] LOG:  checkpoint complete: wrote 166 buffers (1.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=16.491 s, sync=0.783 s, total=18.021 s; sync files=97, longest=0.752 s, average=0.009 s; distance=651 kB, estimate=651 kB; lsn=0/19C16E0, redo lsn=0/19C16A8
+silhouet-backend  | Post 13b8f8df-53be-48a2-91b5-9c939f0b23fc: Sentiment analysis task enqueued for user 799b1a8d-d51f-4414-a6e0-2506b5ebb6aa.
+silhouet-backend  | INFO:     172.18.0.8:53286 - "POST /posts/ HTTP/1.0" 201 Created
+frontend-1        | 192.168.1.7 - - [03/Sep/2025:17:41:26 +0000] "POST /api/posts/ HTTP/1.1" 201 1288 "http://192.168.1.30:3000/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0"
+worker-1          | [2025-09-03 17:41:26,458: INFO/MainProcess] Task process_post_sentiment[241ff528-c575-4064-9944-5fc3a79e1c13] received
+worker-1          | [2025-09-03 17:41:26,458: DEBUG/MainProcess] TaskPool: Apply <function fast_trace_task at 0x78b2729f9ea0> (args:('process_post_sentiment', '241ff528-c575-4064-9944-5fc3a79e1c13', {'lang': 'py', 'task': 'process_post_sentiment', 'id': '241ff528-c575-4064-9944-5fc3a79e1c13', 'shadow': None, 'eta': None, 'expires': None, 'group': None, 'group_index': None, 'retries': 0, 'timelimit': [None, None], 'root_id': '241ff528-c575-4064-9944-5fc3a79e1c13', 'parent_id': None, 'argsrepr': "('13b8f8df-53be-48a2-91b5-9c939f0b23fc', 'According to the U.S. Environmental Protection Agency (EPA), and defined by the Federal Insecticide, Fungicide, and Rodenticide Act, antimicrobial pesticides are used to control growth of microbes through disinfection, sanitation, or reduction of development and to protect inanimate objects, industrial processes or systems, surfaces, water, or other chemical substances from contamination, fouling, or deterioration caused by bacteria, viruses, fungi, protozoa, algae, or slime.[37] The EPA monitors products, such as disinfectants/sanitizers for use in hospitals or homes, to ascertain efficacy.[38] Products... kwargs:{})
+worker-1          | [2025-09-03 17:41:26,460: WARNING/ForkPoolWorker-8] Task: Processing sentiment for Post ID: 13b8f8df-53be-48a2-91b5-9c939f0b23fc
+worker-1          | [2025-09-03 17:41:26,471: DEBUG/ForkPoolWorker-8] connect_tcp.started host='model' port=8001 local_address=None timeout=5.0 socket_options=None
+worker-1          | [2025-09-03 17:41:26,472: DEBUG/ForkPoolWorker-8] connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x78b26edc0d60>
+worker-1          | [2025-09-03 17:41:26,472: DEBUG/ForkPoolWorker-8] send_request_headers.started request=<Request [b'POST']>
+worker-1          | [2025-09-03 17:41:26,472: DEBUG/ForkPoolWorker-8] send_request_headers.complete
+worker-1          | [2025-09-03 17:41:26,473: DEBUG/ForkPoolWorker-8] send_request_body.started request=<Request [b'POST']>
+worker-1          | [2025-09-03 17:41:26,473: DEBUG/ForkPoolWorker-8] send_request_body.complete
+worker-1          | [2025-09-03 17:41:26,473: DEBUG/ForkPoolWorker-8] receive_response_headers.started request=<Request [b'POST']>
+silhouet-backend  | INFO:     172.18.0.8:53294 - "GET /scores/me HTTP/1.0" 200 OK
+frontend-1        | 192.168.1.7 - - [03/Sep/2025:17:41:28 +0000] "GET /api/scores/me HTTP/1.1" 200 2905 "http://192.168.1.30:3000/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0"
+model-1           | [Processing] Full text: According to the U.S. Environmental Protection Agency (EPA), and defined by the ...
+model-1           | INFO:     172.18.0.6:41348 - "POST /process HTTP/1.1" 200 OK
+worker-1          | [2025-09-03 17:41:29,470: DEBUG/ForkPoolWorker-8] receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Wed, 03 Sep 2025 17:41:25 GMT'), (b'server', b'uvicorn'), (b'content-length', b'2659'), (b'content-type', b'application/json')])
+worker-1          | [2025-09-03 17:41:29,470: INFO/ForkPoolWorker-8] HTTP Request: POST http://model:8001/process "HTTP/1.1 200 OK"
+worker-1          | [2025-09-03 17:41:29,470: DEBUG/ForkPoolWorker-8] receive_response_body.started request=<Request [b'POST']>
+worker-1          | [2025-09-03 17:41:29,470: DEBUG/ForkPoolWorker-8] receive_response_body.complete
+worker-1          | [2025-09-03 17:41:29,470: DEBUG/ForkPoolWorker-8] response_closed.started
+worker-1          | [2025-09-03 17:41:29,470: DEBUG/ForkPoolWorker-8] response_closed.complete
+worker-1          | [2025-09-03 17:41:29,471: DEBUG/ForkPoolWorker-8] close.started
+worker-1          | [2025-09-03 17:41:29,471: DEBUG/ForkPoolWorker-8] close.complete
+worker-1          | [2025-09-03 17:41:29,487: WARNING/ForkPoolWorker-8] Task: Post 13b8f8df-53be-48a2-91b5-9c939f0b23fc: Sentiment scores saved to post.
+worker-1          | [2025-09-03 17:41:29,494: WARNING/ForkPoolWorker-8] Task: User 799b1a8d-d51f-4414-a6e0-2506b5ebb6aa: Average scores updated.
+worker-1          | [2025-09-03 17:41:29,496: WARNING/ForkPoolWorker-8] Task: Published sentiment update for post 13b8f8df-53be-48a2-91b5-9c939f0b23fc to Redis channel 'sentiment_updates'.
+worker-1          | [2025-09-03 17:41:29,496: WARNING/ForkPoolWorker-8] Task: Post 13b8f8df-53be-48a2-91b5-9c939f0b23fc: No claims received or claims format is invalid.
+worker-1          | [2025-09-03 17:41:29,497: INFO/ForkPoolWorker-8] Task process_post_sentiment[241ff528-c575-4064-9944-5fc3a79e1c13] succeeded in 3.0379597889987053s: None
+silhouet-backend  | INFO:     Shutting down
+silhouet-backend  | INFO:     Waiting for application shutdown.
+silhouet-backend  | INFO:     Application shutdown complete.
+silhouet-backend  | INFO:     Finished server process [1]
+silhouet-backend  | Redis client closed.
+[Kcron-1 exited with code 0
+[Kfrontend-1 exited with code 0
+[Ksilhouet-backend exited with code 0
+worker-1          | 
+worker-1          | worker: Warm shutdown (MainProcess)
+worker-1          | [2025-09-03 17:42:44,874: DEBUG/MainProcess] | Worker: Closing Beat...
+worker-1          | [2025-09-03 17:42:44,874: DEBUG/MainProcess] | Worker: Closing Hub...
+worker-1          | [2025-09-03 17:42:44,875: DEBUG/MainProcess] | Worker: Closing Pool...
+worker-1          | [2025-09-03 17:42:44,875: DEBUG/MainProcess] | Worker: Closing Consumer...
+worker-1          | [2025-09-03 17:42:44,875: DEBUG/MainProcess] | Worker: Stopping Consumer...
+worker-1          | [2025-09-03 17:42:44,875: DEBUG/MainProcess] | Consumer: Closing Connection...
+worker-1          | [2025-09-03 17:42:44,875: DEBUG/MainProcess] | Consumer: Closing Events...
+worker-1          | [2025-09-03 17:42:44,875: DEBUG/MainProcess] | Consumer: Closing Mingle...
+worker-1          | [2025-09-03 17:42:44,875: DEBUG/MainProcess] | Consumer: Closing Tasks...
+worker-1          | [2025-09-03 17:42:44,876: DEBUG/MainProcess] | Consumer: Closing Control...
+worker-1          | [2025-09-03 17:42:44,876: DEBUG/MainProcess] | Consumer: Closing Gossip...
+worker-1          | [2025-09-03 17:42:44,876: DEBUG/MainProcess] | Consumer: Closing Heart...
+worker-1          | [2025-09-03 17:42:44,876: DEBUG/MainProcess] | Consumer: Closing event loop...
+worker-1          | [2025-09-03 17:42:44,876: DEBUG/MainProcess] | Consumer: Stopping event loop...
+worker-1          | [2025-09-03 17:42:44,876: DEBUG/MainProcess] | Consumer: Stopping Heart...
+worker-1          | [2025-09-03 17:42:44,877: DEBUG/MainProcess] | Consumer: Stopping Gossip...
+worker-1          | [2025-09-03 17:42:44,878: DEBUG/MainProcess] | Consumer: Stopping Control...
+worker-1          | [2025-09-03 17:42:44,880: DEBUG/MainProcess] | Consumer: Stopping Tasks...
+worker-1          | [2025-09-03 17:42:44,880: DEBUG/MainProcess] Canceling task consumer...
+worker-1          | [2025-09-03 17:42:44,880: DEBUG/MainProcess] | Consumer: Stopping Mingle...
+worker-1          | [2025-09-03 17:42:44,880: DEBUG/MainProcess] | Consumer: Stopping Events...
+worker-1          | [2025-09-03 17:42:44,880: DEBUG/MainProcess] | Consumer: Stopping Connection...
+worker-1          | [2025-09-03 17:42:44,880: DEBUG/MainProcess] | Worker: Stopping Pool...
+worker-1          | [2025-09-03 17:42:45,890: DEBUG/MainProcess] | Worker: Stopping Hub...
+worker-1          | [2025-09-03 17:42:45,891: DEBUG/MainProcess] | Worker: Stopping Beat...
+worker-1          | [2025-09-03 17:42:45,891: INFO/MainProcess] beat: Shutting down...
+worker-1          | [2025-09-03 17:42:45,891: DEBUG/MainProcess] | Consumer: Shutdown Heart...
+worker-1          | [2025-09-03 17:42:45,891: DEBUG/MainProcess] | Consumer: Shutdown Gossip...
+worker-1          | [2025-09-03 17:42:45,891: DEBUG/MainProcess] | Consumer: Shutdown Control...
+worker-1          | [2025-09-03 17:42:45,891: DEBUG/MainProcess] | Consumer: Shutdown Tasks...
+worker-1          | [2025-09-03 17:42:45,891: DEBUG/MainProcess] Canceling task consumer...
+worker-1          | [2025-09-03 17:42:45,891: DEBUG/MainProcess] Closing consumer channel...
+worker-1          | [2025-09-03 17:42:45,891: DEBUG/MainProcess] | Consumer: Shutdown Events...
+worker-1          | [2025-09-03 17:42:45,892: DEBUG/MainProcess] | Consumer: Shutdown Connection...
+worker-1          | [2025-09-03 17:42:45,893: DEBUG/MainProcess] removing tasks from inqueue until task handler finished
+[Kworker-1 exited with code 0
+db-1              | 2025-09-03 17:42:49.825 UTC [1] LOG:  received fast shutdown request
+redis-1           | 1:signal-handler (1756921369) Received SIGTERM scheduling shutdown...
+db-1              | 2025-09-03 17:42:49.837 UTC [1] LOG:  aborting any active transactions
+db-1              | 2025-09-03 17:42:49.839 UTC [1] LOG:  background worker "logical replication launcher" (PID 60) exited with exit code 1
+db-1              | 2025-09-03 17:42:49.840 UTC [55] LOG:  shutting down
+db-1              | 2025-09-03 17:42:49.845 UTC [55] LOG:  checkpoint starting: shutdown immediate
+db-1              | 2025-09-03 17:42:49.893 UTC [55] LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.005 s, sync=0.023 s, total=0.054 s; sync files=8, longest=0.016 s, average=0.003 s; distance=13 kB, estimate=587 kB; lsn=0/19C4D68, redo lsn=0/19C4D68
+db-1              | 2025-09-03 17:42:49.898 UTC [1] LOG:  database system is shut down
+redis-1           | 1:M 03 Sep 2025 17:42:49.900 * User requested shutdown...
+redis-1           | 1:M 03 Sep 2025 17:42:49.900 * Saving the final RDB snapshot before exiting.
+redis-1           | 1:M 03 Sep 2025 17:42:49.912 * DB saved on disk
+redis-1           | 1:M 03 Sep 2025 17:42:49.912 # Redis is now ready to exit, bye bye...
+model-1           | INFO:     Shutting down
+model-1           | INFO:     Waiting for application shutdown.
+model-1           | INFO:     Application shutdown complete.
+model-1           | INFO:     Finished server process [1]
+[Kdb-1 exited with code 0
+[Kredis-1 exited with code 0
+[Kmodel-1 exited with code 0

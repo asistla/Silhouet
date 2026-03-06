@@ -1,0 +1,39 @@
+I have now reviewed the frontend, backend, and model code. I have a good understanding of the complete workflow.
+
+Here's a summary of the user flow and system architecture:
+
+1.  **User Interaction (Frontend):**
+    *   The user visits the web interface, which is a React single-page application.
+    *   They are first presented with a `LoginPage` where they enter a public key.
+    *   The app checks with the backend if the public key exists.
+        *   If it **exists**, the user is prompted for a passphrase (though this is not yet validated) and then logged in.
+        *   If it **does not exist**, the user is redirected to a `RegistrationPage`.
+    *   On the `RegistrationPage`, the user provides demographic and geographic information. This, along with their public key, is used to create a new user in the system.
+    *   Once logged in, the user sees the main `App` dashboard.
+
+2.  **Dashboard (Frontend):**
+    *   The dashboard has three main parts:
+        *   **Journal:** A text area where the user can write and submit posts.
+        *   **Cohort Filters:** A set of input fields to filter demographic and geographic data for cohort analysis.
+        *   **Score Chart:** A bar chart that displays the user's own psychographic scores against the aggregated scores of the selected cohort.
+    *   Submitting a journal entry sends the text to the backend. The frontend then polls for updated scores after a short delay.
+    *   Applying filters sends a request to the backend to get the aggregated scores for the matching user group.
+
+3.  **User & Post Handling (Backend):**
+    *   The FastAPI backend (`app.py`) handles all API requests.
+    *   When a user logs in or registers (`/users/`), the `get_or_create_user` function in `crud/users.py` is called. New users are created with default scores of 0.5 for all personality traits.
+    *   When a user submits a post (`/posts/`), the `create_post` function in `crud/posts.py` is called.
+    *   Crucially, `create_post` does not perform the scoring itself. It dispatches a task (`process_post_sentiment_task`) to a Celery worker. This is a good asynchronous pattern to avoid blocking the API.
+
+4.  **Scoring (Model & Celery Worker):**
+    *   The `model/serve.py` script is a FastAPI application that exposes a `/score` endpoint. It loads a sentence-transformer model (`all-mpnet-base-v2`).
+    *   For each of the 57 `PERSONALITY_KEYS` from `silhouet_config.py`, it creates a vector representation of the positive and negative example phrases.
+    *   When it receives text, it calculates the cosine similarity of the text's embedding to the positive and negative vectors for each trait, resulting in a bipolar score.
+    *   The `celery_worker.py` (which I inferred from the `crud/posts.py` code) will call this model service. After getting the scores, it will update the user's running average scores in the database using the `update_user_scores` function.
+
+5.  **Data Storage (Database):**
+    *   A PostgreSQL database is used.
+    *   The `models.py` file defines three tables:
+        *   `users`: Stores the user's public key, demographic/geographic data, and their running average scores for each personality trait.
+        *   `posts`: Stores the raw text of each post, along with the resulting scores from the model.
+        *   `aggregated_geo_scores`: Intended to store the pre-calculated average scores for different geographic levels (pincode, city, etc.), though the mechanism for updating this table is not yet implemented.

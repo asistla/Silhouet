@@ -1,0 +1,49 @@
+@router.post("/login", response_model=TokenResponse)
+async def login(request: LoginRequest, db: Session = Depends(get_db)):
+    user = await authenticate_user_challenge(db, redis_client, request.public_key, request.signature)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
+        )
+    
+    access_token = await create_access_token(
+        data={"sub": user.public_key},
+        redis_client=redis_client,
+        expires_delta=timedelta(minutes=30)
+    )
+    
+    return TokenResponse(access_token=access_token, token_type="bearer")
+
+async def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    token_data = await verify_token(token, redis_client, credentials_exception)
+    user = get_user_by_public_key(db, public_key=token_data.sub)
+    if user is None:
+        raise credentials_exception
+    return user
+
+@router.post("/admin/rotate-key")
+async def manual_key_rotation(current_user: User = Depends(get_admin_user)):
+    manager = get_key_manager(redis_client)
+    new_key_id = await manager.rotate_key()
+    return {"message": f"Key rotated successfully. New key ID: {new_key_id}"}
+
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.on_event("startup")
+async def startup_event():
+    manager = get_key_manager(redis_client)
+    await manager.initialize_keys()
+    print("JWT Key Manager initialized")
+    
